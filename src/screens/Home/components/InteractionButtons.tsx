@@ -8,6 +8,7 @@ import {
   Utensils,
 } from 'lucide-react-native';
 
+import {useAppTheme} from '../../../theme/ThemeProvider';
 import {preferenceLabels} from '../constants/preferenceOptions';
 import type {PreferenceKey, PreferenceOption, UserPreferences} from '../types';
 
@@ -46,6 +47,7 @@ export default function InteractionButtons({
   onOptionSelect,
   onCancelOptions,
 }: InteractionButtonsProps) {
+  const {theme} = useAppTheme();
   const transitionAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
@@ -78,7 +80,12 @@ export default function InteractionButtons({
 
   if (selectedAction) {
     return (
-      <Animated.View style={[styles.optionPanel, animatedStyle]}>
+      <Animated.View
+        style={[
+          styles.optionPanel,
+          {backgroundColor: theme.surface},
+          animatedStyle,
+        ]}>
         <View style={styles.optionHeader}>
           <Pressable
             onPress={onCancelOptions}
@@ -86,9 +93,9 @@ export default function InteractionButtons({
               styles.backButton,
               pressed && styles.pressedButton,
             ]}>
-            <ChevronLeft color="#60665E" size={18} />
+            <ChevronLeft color={theme.icon} size={18} />
           </Pressable>
-          <Text style={styles.optionTitle}>
+          <Text style={[styles.optionTitle, {color: theme.text}]}>
             {preferenceLabels[selectedAction]} 취향 고르기
           </Text>
         </View>
@@ -99,10 +106,15 @@ export default function InteractionButtons({
             onPress={() => onOptionSelect(option.label)}
             style={({pressed}) => [
               styles.optionButton,
+              {backgroundColor: theme.surfaceMuted, borderColor: theme.border},
               pressed && styles.pressedButton,
             ]}>
-            <Text style={styles.optionLabel}>{option.label}</Text>
-            <Text style={styles.optionDescription}>{option.description}</Text>
+            <Text style={[styles.optionLabel, {color: theme.text}]}>
+              {option.label}
+            </Text>
+            <Text style={[styles.optionDescription, {color: theme.textMuted}]}>
+              {option.description}
+            </Text>
           </Pressable>
         ))}
       </Animated.View>
@@ -121,11 +133,19 @@ export default function InteractionButtons({
             onPress={() => onActionSelect(key)}
             style={({pressed}) => [
               styles.button,
+              {backgroundColor: theme.surface},
               completed && styles.completedButton,
+              completed && {backgroundColor: theme.surfaceMuted},
               pressed && !completed && styles.pressedButton,
             ]}>
-            <Icon color={completed ? '#9AA39A' : '#60665E'} size={24} />
-            <Text style={[styles.label, completed && styles.completedLabel]}>
+            <Icon color={completed ? theme.textMuted : theme.icon} size={24} />
+            <Text
+              style={[
+                styles.label,
+                {color: theme.text},
+                completed && styles.completedLabel,
+                completed && {color: theme.textMuted},
+              ]}>
               {completed ? completedMessages[key] : label}
             </Text>
           </Pressable>
@@ -143,7 +163,6 @@ const styles = StyleSheet.create({
   },
   button: {
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
     borderRadius: 18,
     flexBasis: '47%',
     flexDirection: 'row',
@@ -157,7 +176,6 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   completedButton: {
-    backgroundColor: '#E9EEE7',
     shadowOpacity: 0,
     elevation: 0,
   },
@@ -165,7 +183,6 @@ const styles = StyleSheet.create({
     opacity: 0.72,
   },
   label: {
-    color: '#4B5149',
     fontSize: 14,
     fontWeight: '600',
   },
@@ -173,7 +190,6 @@ const styles = StyleSheet.create({
     color: '#7E887E',
   },
   optionPanel: {
-    backgroundColor: '#FFFFFF',
     borderRadius: 20,
     padding: 12,
     rowGap: 9,
@@ -196,7 +212,6 @@ const styles = StyleSheet.create({
     width: 30,
   },
   optionTitle: {
-    color: '#3F463D',
     flex: 1,
     fontSize: 14,
     fontWeight: '700',
@@ -204,20 +219,16 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   optionButton: {
-    backgroundColor: '#F6FAF4',
-    borderColor: '#DBE7D6',
     borderRadius: 17,
     borderWidth: 1,
     paddingHorizontal: 14,
     paddingVertical: 11,
   },
   optionLabel: {
-    color: '#3F463D',
     fontSize: 14,
     fontWeight: '700',
   },
   optionDescription: {
-    color: '#6E746B',
     fontSize: 12,
     marginTop: 4,
   },

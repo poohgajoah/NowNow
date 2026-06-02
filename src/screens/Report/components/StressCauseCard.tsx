@@ -2,6 +2,7 @@ import React from 'react';
 import {Pressable, StyleSheet, Text, View} from 'react-native';
 import {TrendingUp} from 'lucide-react-native';
 
+import {useAppTheme} from '../../../theme/ThemeProvider';
 import {causeColors} from '../constants/reportData';
 import type {StressCause} from '../types';
 import ReportCard from './ReportCard';
@@ -17,18 +18,23 @@ export default function StressCauseCard({
   period,
   onPeriodChange,
 }: StressCauseCardProps) {
+  const {theme} = useAppTheme();
   const totalCount = causes.reduce((sum, item) => sum + item.count, 0);
+  const getCauseColor = (index: number) =>
+    index === 0 ? theme.accent : causeColors[index % causeColors.length];
 
   return (
     <ReportCard>
       <View style={styles.header}>
         <View style={styles.titleRow}>
-          <View style={styles.iconWrap}>
-            <TrendingUp color="#517763" size={20} />
+          <View style={[styles.iconWrap, {backgroundColor: theme.iconSurface}]}>
+            <TrendingUp color={theme.icon} size={20} />
           </View>
-          <Text style={styles.title}>스트레스 원인 분석</Text>
+          <Text style={[styles.title, {color: theme.text}]}>
+            스트레스 원인 분석
+          </Text>
         </View>
-        <View style={styles.toggle}>
+        <View style={[styles.toggle, {backgroundColor: theme.surfaceMuted}]}>
           {(['week', 'month'] as const).map(item => (
             <Pressable
               key={item}
@@ -36,11 +42,14 @@ export default function StressCauseCard({
               style={[
                 styles.toggleButton,
                 period === item && styles.activeToggleButton,
+                period === item && {backgroundColor: theme.nav},
               ]}>
               <Text
                 style={[
                   styles.toggleText,
+                  {color: theme.textMuted},
                   period === item && styles.activeToggleText,
+                  period === item && {color: theme.text},
                 ]}>
                 {item === 'week' ? '주간' : '월간'}
               </Text>
@@ -49,9 +58,11 @@ export default function StressCauseCard({
         </View>
       </View>
 
-      <Text style={styles.count}>
+      <Text style={[styles.count, {color: theme.text}]}>
         {totalCount}
-        <Text style={styles.countUnit}>건의 스트레스 기록</Text>
+        <Text style={[styles.countUnit, {color: theme.textMuted}]}>
+          건의 스트레스 기록
+        </Text>
       </Text>
 
       <View style={styles.causes}>
@@ -62,22 +73,24 @@ export default function StressCauseCard({
                 <View
                   style={[
                     styles.dot,
-                    {backgroundColor: causeColors[index % causeColors.length]},
+                    {backgroundColor: getCauseColor(index)},
                   ]}
                 />
-                <Text style={styles.causeLabel}>{item.cause}</Text>
+                <Text style={[styles.causeLabel, {color: theme.text}]}>
+                  {item.cause}
+                </Text>
               </View>
-              <Text style={styles.causeValue}>
+              <Text style={[styles.causeValue, {color: theme.textMuted}]}>
                 {item.count}회 · {item.percentage}%
               </Text>
             </View>
-            <View style={styles.track}>
+            <View style={[styles.track, {backgroundColor: theme.surfaceMuted}]}>
               <View
                 style={[
                   styles.progress,
                   {
                     width: `${item.percentage}%`,
-                    backgroundColor: causeColors[index % causeColors.length],
+                    backgroundColor: getCauseColor(index),
                   },
                 ]}
               />
@@ -100,19 +113,16 @@ const styles = StyleSheet.create({
   },
   iconWrap: {
     alignItems: 'center',
-    backgroundColor: '#E7F1E2',
     borderRadius: 11,
     height: 38,
     justifyContent: 'center',
     width: 38,
   },
   title: {
-    color: '#2F352F',
     fontSize: 17,
     fontWeight: '800',
   },
   toggle: {
-    backgroundColor: '#F4F8F1',
     borderRadius: 13,
     flexDirection: 'row',
     padding: 4,
@@ -124,24 +134,19 @@ const styles = StyleSheet.create({
     paddingVertical: 9,
   },
   activeToggleButton: {
-    backgroundColor: '#C9DEBF',
   },
   toggleText: {
-    color: '#5B6559',
     fontSize: 13,
     fontWeight: '700',
   },
   activeToggleText: {
-    color: '#263326',
   },
   count: {
-    color: '#2F352F',
     fontSize: 30,
     fontWeight: '800',
     marginTop: 18,
   },
   countUnit: {
-    color: '#6E746B',
     fontSize: 13,
     fontWeight: '600',
   },
@@ -166,17 +171,14 @@ const styles = StyleSheet.create({
     width: 10,
   },
   causeLabel: {
-    color: '#2F352F',
     fontSize: 14,
     fontWeight: '700',
   },
   causeValue: {
-    color: '#6E746B',
     fontSize: 12,
     fontWeight: '700',
   },
   track: {
-    backgroundColor: '#EEF2EB',
     borderRadius: 5,
     height: 9,
     overflow: 'hidden',
@@ -186,4 +188,3 @@ const styles = StyleSheet.create({
     height: '100%',
   },
 });
-

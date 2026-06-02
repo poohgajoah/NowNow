@@ -47,9 +47,10 @@ export default function SettingsSection({title, items}: SettingsSectionProps) {
                   styles.iconWrap,
                   {backgroundColor: theme.iconSurface},
                   item.destructive && styles.destructiveIconWrap,
+                  item.destructive && {backgroundColor: theme.accentMuted},
                 ]}>
                 <Icon
-                  color={item.destructive ? '#D65F7F' : theme.icon}
+                  color={item.destructive ? theme.accent : theme.icon}
                   size={20}
                 />
               </View>
@@ -59,6 +60,7 @@ export default function SettingsSection({title, items}: SettingsSectionProps) {
                     styles.label,
                     {color: theme.text},
                     item.destructive && styles.destructiveLabel,
+                    item.destructive && {color: theme.accent},
                   ]}>
                   {item.label}
                 </Text>
@@ -120,7 +122,6 @@ const styles = StyleSheet.create({
     width: 40,
   },
   destructiveIconWrap: {
-    backgroundColor: '#FFF0F5',
   },
   textArea: {
     flex: 1,
@@ -131,7 +132,6 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   destructiveLabel: {
-    color: '#D65F7F',
   },
   description: {
     color: '#788276',

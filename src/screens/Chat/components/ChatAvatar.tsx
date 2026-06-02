@@ -1,16 +1,20 @@
 import React from 'react';
 import {StyleSheet, View} from 'react-native';
 
+import {useAppTheme} from '../../../theme/ThemeProvider';
+
 export default function ChatAvatar() {
+  const {theme} = useAppTheme();
+
   return (
-    <View style={styles.avatar}>
-      <View style={styles.face}>
+    <View style={[styles.avatar, {backgroundColor: theme.accentMuted}]}>
+      <View style={[styles.face, {backgroundColor: theme.accent}]}>
         <View style={styles.eye} />
         <View style={[styles.eye, styles.rightEye]} />
         <View style={styles.mouth} />
       </View>
-      <View style={styles.leftHand} />
-      <View style={styles.rightHand} />
+      <View style={[styles.leftHand, {backgroundColor: theme.accent}]} />
+      <View style={[styles.rightHand, {backgroundColor: theme.accent}]} />
     </View>
   );
 }
@@ -18,14 +22,12 @@ export default function ChatAvatar() {
 const styles = StyleSheet.create({
   avatar: {
     alignItems: 'center',
-    backgroundColor: '#F5C7D7',
     borderRadius: 18,
     height: 36,
     justifyContent: 'center',
     width: 36,
   },
   face: {
-    backgroundColor: '#EF78A6',
     borderRadius: 12,
     height: 24,
     width: 24,
@@ -53,7 +55,6 @@ const styles = StyleSheet.create({
     width: 7,
   },
   leftHand: {
-    backgroundColor: '#E84F8D',
     borderRadius: 4,
     height: 8,
     left: 7,
@@ -62,7 +63,6 @@ const styles = StyleSheet.create({
     width: 8,
   },
   rightHand: {
-    backgroundColor: '#E84F8D',
     borderRadius: 4,
     height: 8,
     position: 'absolute',

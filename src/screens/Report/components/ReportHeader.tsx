@@ -1,8 +1,10 @@
 import React from 'react';
 import {StyleSheet, Text, View} from 'react-native';
 import {Sparkles} from 'lucide-react-native';
+import {useAppTheme} from '../../../theme/ThemeProvider';
 
 export default function ReportHeader() {
+  const {theme} = useAppTheme();
   const today = new Intl.DateTimeFormat('ko-KR', {
     year: 'numeric',
     month: 'long',
@@ -10,13 +12,15 @@ export default function ReportHeader() {
   }).format(new Date());
 
   return (
-    <View style={styles.header}>
+    <View style={[styles.header, {backgroundColor: theme.nav}]}>
       <View style={styles.iconWrap}>
-        <Sparkles color="#FFFFFF" size={24} />
+        <Sparkles color={theme.text} size={24} />
       </View>
       <View>
-        <Text style={styles.title}>건강 리포트</Text>
-        <Text style={styles.subtitle}>{today} 상태를 한눈에</Text>
+        <Text style={[styles.title, {color: theme.text}]}>건강 리포트</Text>
+        <Text style={[styles.subtitle, {color: theme.textMuted}]}>
+          {today} 상태를 한눈에
+        </Text>
       </View>
     </View>
   );
@@ -25,7 +29,6 @@ export default function ReportHeader() {
 const styles = StyleSheet.create({
   header: {
     alignItems: 'center',
-    backgroundColor: '#91B6A4',
     borderRadius: 20,
     flexDirection: 'row',
     gap: 14,
@@ -40,14 +43,11 @@ const styles = StyleSheet.create({
     width: 48,
   },
   title: {
-    color: '#FFFFFF',
     fontSize: 22,
     fontWeight: '800',
   },
   subtitle: {
-    color: '#F4FBF1',
     fontSize: 12,
     marginTop: 4,
   },
 });
-

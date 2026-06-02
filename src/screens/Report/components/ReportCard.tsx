@@ -1,5 +1,6 @@
 import React from 'react';
 import {StyleSheet, View, type ViewStyle} from 'react-native';
+import {useAppTheme} from '../../../theme/ThemeProvider';
 
 interface ReportCardProps {
   children: React.ReactNode;
@@ -7,12 +8,17 @@ interface ReportCardProps {
 }
 
 export default function ReportCard({children, style}: ReportCardProps) {
-  return <View style={[styles.card, style]}>{children}</View>;
+  const {theme} = useAppTheme();
+
+  return (
+    <View style={[styles.card, {backgroundColor: theme.surface}, style]}>
+      {children}
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#FFFFFF',
     borderRadius: 18,
     padding: 18,
     shadowColor: '#000000',
@@ -22,4 +28,3 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
 });
-

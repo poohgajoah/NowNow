@@ -10,6 +10,11 @@ export const appThemes = {
     surfaceMuted: '#F4F8F1',
     nav: '#C9DEBF',
     navIndicator: '#EEF7EC',
+    bubble: '#FFFFFF',
+    input: '#FFFFFF',
+    accent: '#E8A5B8',
+    accentMuted: '#FFF3F7',
+    accentText: '#FFFFFF',
     text: '#2F352F',
     textMuted: '#788276',
     border: '#E7ECE3',
@@ -19,17 +24,22 @@ export const appThemes = {
   },
   dark: {
     mode: 'dark' as ThemeMode,
-    background: '#18231B',
-    surface: '#243026',
-    surfaceMuted: '#2E3B30',
-    nav: '#334733',
-    navIndicator: '#4F6A4B',
-    text: '#F0F6EE',
-    textMuted: '#B9C8B5',
-    border: '#3C4C3D',
-    iconSurface: '#334733',
-    icon: '#DCEADC',
-    pressed: '#2D3A30',
+    background: '#1A1C19',
+    surface: '#252722',
+    surfaceMuted: '#2E302B',
+    nav: '#3A3D35',
+    navIndicator: '#4B4F44',
+    bubble: '#282A25',
+    input: '#282A25',
+    accent: '#82616A',
+    accentMuted: '#33292D',
+    accentText: '#F4ECEF',
+    text: '#F0F1EA',
+    textMuted: '#B7BAAF',
+    border: '#3A3D36',
+    iconSurface: '#30332D',
+    icon: '#D8DACF',
+    pressed: '#2B2E28',
   },
 };
 
@@ -71,4 +81,3 @@ export const useAppTheme = () => {
 
   return value;
 };
-

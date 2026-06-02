@@ -88,7 +88,7 @@ const styles = StyleSheet.create({
   },
   chatPanel: {
     flex: 1,
-    paddingBottom: 12,
+    paddingBottom: 0,
   },
   messageList: {
     flex: 1,

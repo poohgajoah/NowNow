@@ -1,6 +1,7 @@
-import React from 'react';
-import {Pressable, StyleSheet, Text, View} from 'react-native';
+import React, {useEffect, useRef} from 'react';
+import {Animated, Pressable, StyleSheet, Text, View} from 'react-native';
 
+import {useAppTheme} from '../../../theme/ThemeProvider';
 import type {Message} from '../types';
 
 interface MessageBubbleProps {
@@ -12,24 +13,59 @@ export default function MessageBubble({
   message,
   onButtonPress,
 }: MessageBubbleProps) {
+  const {theme} = useAppTheme();
   const isUser = message.role === 'user';
+  const appearAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.spring(appearAnim, {
+      damping: 16,
+      mass: 0.8,
+      stiffness: 130,
+      toValue: 1,
+      useNativeDriver: true,
+    }).start();
+  }, [appearAnim]);
+
+  const animatedStyle = {
+    opacity: appearAnim,
+    transform: [
+      {
+        translateY: appearAnim.interpolate({
+          inputRange: [0, 1],
+          outputRange: [16, 0],
+        }),
+      },
+      {
+        scale: appearAnim.interpolate({
+          inputRange: [0, 1],
+          outputRange: [0.98, 1],
+        }),
+      },
+    ],
+  };
 
   return (
-    <View
+    <Animated.View
       style={[
         styles.messageRow,
         isUser ? styles.userMessageRow : styles.botMessageRow,
+        animatedStyle,
       ]}>
-      {isUser && <Text style={styles.timeText}>{message.createdAt}</Text>}
+      {isUser && (
+        <Text style={[styles.timeText, {color: theme.textMuted}]}>
+          {message.createdAt}
+        </Text>
+      )}
       <View
         style={[
           styles.messageBubble,
-          isUser ? styles.userBubble : styles.botBubble,
+          {backgroundColor: theme.bubble},
         ]}>
         <Text
           style={[
             styles.messageText,
-            isUser ? styles.userMessageText : styles.botMessageText,
+            {color: theme.text},
           ]}>
           {message.content}
         </Text>
@@ -42,16 +78,24 @@ export default function MessageBubble({
                 onPress={() => onButtonPress(button.action)}
                 style={({pressed}) => [
                   styles.choiceButton,
+                  {backgroundColor: theme.accent},
                   pressed && styles.pressedChoiceButton,
                 ]}>
-                <Text style={styles.choiceButtonText}>{button.label}</Text>
+                <Text
+                  style={[styles.choiceButtonText, {color: theme.accentText}]}>
+                  {button.label}
+                </Text>
               </Pressable>
             ))}
           </View>
         )}
       </View>
-      {!isUser && <Text style={styles.timeText}>{message.createdAt}</Text>}
-    </View>
+      {!isUser && (
+        <Text style={[styles.timeText, {color: theme.textMuted}]}>
+          {message.createdAt}
+        </Text>
+      )}
+    </Animated.View>
   );
 }
 
@@ -74,25 +118,12 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   timeText: {
-    color: '#7B857A',
     fontSize: 10,
     marginBottom: 3,
-  },
-  userBubble: {
-    backgroundColor: '#FFFFFF',
-  },
-  botBubble: {
-    backgroundColor: '#FFFFFF',
   },
   messageText: {
     fontSize: 13,
     lineHeight: 20,
-  },
-  userMessageText: {
-    color: '#4B5149',
-  },
-  botMessageText: {
-    color: '#4B5149',
   },
   buttonGroup: {
     flexDirection: 'row',
@@ -101,7 +132,6 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   choiceButton: {
-    backgroundColor: '#E8A5B8',
     borderRadius: 10,
     paddingHorizontal: 14,
     paddingVertical: 9,
@@ -110,7 +140,6 @@ const styles = StyleSheet.create({
     opacity: 0.82,
   },
   choiceButtonText: {
-    color: '#FFFFFF',
     fontSize: 13,
     fontWeight: '700',
   },

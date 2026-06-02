@@ -2,6 +2,7 @@ import React from 'react';
 import {Pressable, StyleSheet, Text, View} from 'react-native';
 import {ChevronLeft} from 'lucide-react-native';
 
+import {useAppTheme} from '../../../theme/ThemeProvider';
 import ChatAvatar from './ChatAvatar';
 
 interface ChatHeaderProps {
@@ -10,21 +11,25 @@ interface ChatHeaderProps {
 }
 
 export default function ChatHeader({title, onBack}: ChatHeaderProps) {
+  const {theme} = useAppTheme();
+
   return (
-    <View style={styles.header}>
+    <View style={[styles.header, {backgroundColor: theme.background}]}>
       <Pressable
         onPress={onBack}
         style={({pressed}) => [
           styles.backButton,
-          pressed && styles.pressedBackButton,
+          pressed && {backgroundColor: theme.pressed},
         ]}>
-        <ChevronLeft color="#4B5149" size={24} />
+        <ChevronLeft color={theme.text} size={24} />
       </Pressable>
       <View style={styles.headerTitleArea}>
         <ChatAvatar />
-        <Text style={styles.headerTitle}>뿡뿡이</Text>
-        <View style={styles.divider} />
-        <Text style={styles.headerSubtitle}>{title}</Text>
+        <Text style={[styles.headerTitle, {color: theme.text}]}>뿡뿡이</Text>
+        <View style={[styles.divider, {backgroundColor: theme.border}]} />
+        <Text style={[styles.headerSubtitle, {color: theme.textMuted}]}>
+          {title}
+        </Text>
       </View>
     </View>
   );
@@ -33,7 +38,6 @@ export default function ChatHeader({title, onBack}: ChatHeaderProps) {
 const styles = StyleSheet.create({
   header: {
     alignItems: 'flex-start',
-    backgroundColor: '#EEF7EC',
     flexDirection: 'row',
     paddingHorizontal: 12,
     paddingTop: 8,
@@ -47,7 +51,6 @@ const styles = StyleSheet.create({
     width: 36,
   },
   pressedBackButton: {
-    backgroundColor: 'rgba(75, 81, 73, 0.1)',
   },
   headerTitleArea: {
     alignItems: 'center',
@@ -55,19 +58,16 @@ const styles = StyleSheet.create({
     paddingRight: 36,
   },
   headerTitle: {
-    color: '#42483F',
     fontSize: 13,
     fontWeight: '700',
     marginTop: 5,
   },
   divider: {
-    backgroundColor: '#C7D4C3',
     height: StyleSheet.hairlineWidth,
     marginTop: 10,
     width: '100%',
   },
   headerSubtitle: {
-    color: '#555C53',
     fontSize: 10,
     marginTop: 8,
     textAlign: 'center',

@@ -1,6 +1,7 @@
 import React, {useEffect, useRef} from 'react';
 import {Animated, StyleSheet, Text, View} from 'react-native';
 
+import {useAppTheme} from '../../../theme/ThemeProvider';
 import type {MoodType} from '../types';
 
 interface CharacterMessageProps {
@@ -14,6 +15,7 @@ const messages: Record<MoodType, string> = {
 };
 
 export default function CharacterMessage({userMood}: CharacterMessageProps) {
+  const {theme} = useAppTheme();
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const translateAnim = useRef(new Animated.Value(0)).current;
 
@@ -36,13 +38,15 @@ export default function CharacterMessage({userMood}: CharacterMessageProps) {
   }, [fadeAnim, translateAnim, userMood]);
 
   return (
-    <View style={styles.card}>
+    <View style={[styles.card, {backgroundColor: theme.surface}]}>
       <Animated.View
         style={{
           opacity: fadeAnim,
           transform: [{translateY: translateAnim}],
         }}>
-        <Text style={styles.message}>{messages[userMood]}</Text>
+        <Text style={[styles.message, {color: theme.text}]}>
+          {messages[userMood]}
+        </Text>
       </Animated.View>
     </View>
   );
@@ -51,7 +55,6 @@ export default function CharacterMessage({userMood}: CharacterMessageProps) {
 const styles = StyleSheet.create({
   card: {
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
     borderRadius: 20,
     minHeight: 82,
     justifyContent: 'center',
@@ -63,7 +66,6 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   message: {
-    color: '#4B5149',
     fontSize: 14,
     lineHeight: 22,
     textAlign: 'center',

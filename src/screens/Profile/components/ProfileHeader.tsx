@@ -10,8 +10,8 @@ export default function ProfileHeader() {
 
   return (
     <View style={[styles.card, {backgroundColor: theme.surface}]}>
-      <View style={styles.avatar}>
-        <User color="#FFFFFF" size={32} />
+      <View style={[styles.avatar, {backgroundColor: theme.accent}]}>
+        <User color={theme.accentText} size={32} />
       </View>
       <View>
         <Text style={[styles.name, {color: theme.text}]}>{profile.name}</Text>
@@ -38,7 +38,6 @@ const styles = StyleSheet.create({
   },
   avatar: {
     alignItems: 'center',
-    backgroundColor: '#E8A5B8',
     borderRadius: 32,
     height: 64,
     justifyContent: 'center',

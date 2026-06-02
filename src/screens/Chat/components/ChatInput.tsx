@@ -1,6 +1,8 @@
-import React from 'react';
-import {Pressable, StyleSheet, TextInput, View} from 'react-native';
+import React, {useRef} from 'react';
+import {Animated, Pressable, StyleSheet, TextInput, View} from 'react-native';
 import {Send} from 'lucide-react-native';
+
+import {useAppTheme} from '../../../theme/ThemeProvider';
 
 interface ChatInputProps {
   value: string;
@@ -9,24 +11,52 @@ interface ChatInputProps {
 }
 
 export default function ChatInput({value, onChangeText, onSend}: ChatInputProps) {
+  const {theme} = useAppTheme();
+  const sendScale = useRef(new Animated.Value(1)).current;
+
+  const handleSendPress = () => {
+    Animated.sequence([
+      Animated.timing(sendScale, {
+        duration: 70,
+        toValue: 0.9,
+        useNativeDriver: true,
+      }),
+      Animated.spring(sendScale, {
+        friction: 3,
+        tension: 150,
+        toValue: 1,
+        useNativeDriver: true,
+      }),
+    ]).start();
+    onSend();
+  };
+
   return (
-    <View style={styles.inputArea}>
+    <View style={[styles.inputArea, {backgroundColor: theme.background}]}>
       <TextInput
         value={value}
         onChangeText={onChangeText}
         onSubmitEditing={onSend}
         placeholder="오늘 하루를 이야기해 주세요..."
-        placeholderTextColor="#9CA3AF"
+        placeholderTextColor={theme.textMuted}
         returnKeyType="send"
-        style={styles.input}
+        style={[
+          styles.input,
+          {backgroundColor: theme.input, color: theme.text},
+        ]}
       />
       <Pressable
-        onPress={onSend}
+        onPress={handleSendPress}
         style={({pressed}) => [
-          styles.sendButton,
           pressed && styles.pressedSendButton,
         ]}>
-        <Send color="#FFFFFF" size={20} />
+        <Animated.View
+          style={[
+            styles.sendButton,
+            {backgroundColor: theme.accent, transform: [{scale: sendScale}]},
+          ]}>
+          <Send color={theme.accentText} size={20} />
+        </Animated.View>
       </Pressable>
     </View>
   );
@@ -34,17 +64,14 @@ export default function ChatInput({value, onChangeText, onSend}: ChatInputProps)
 
 const styles = StyleSheet.create({
   inputArea: {
-    backgroundColor: '#EEF7EC',
     flexDirection: 'row',
     gap: 10,
-    paddingBottom: 14,
+    paddingBottom: 6,
     paddingHorizontal: 16,
     paddingTop: 10,
   },
   input: {
-    backgroundColor: '#FFFFFF',
     borderRadius: 18,
-    color: '#4B5149',
     flex: 1,
     fontSize: 13,
     minHeight: 44,
@@ -52,7 +79,6 @@ const styles = StyleSheet.create({
   },
   sendButton: {
     alignItems: 'center',
-    backgroundColor: '#E8A5B8',
     borderRadius: 18,
     justifyContent: 'center',
     minHeight: 44,

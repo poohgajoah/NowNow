@@ -1,6 +1,7 @@
 import React, {useEffect, useRef} from 'react';
 import {Animated, Pressable, StyleSheet, Text, View} from 'react-native';
 
+import {useAppTheme} from '../../../theme/ThemeProvider';
 import type {MoodType} from '../types';
 
 interface MoodSelectorProps {
@@ -29,6 +30,7 @@ function MoodOption({
   selected,
   onMoodChange,
 }: MoodOptionProps) {
+  const {theme} = useAppTheme();
   const selectedAnim = useRef(new Animated.Value(selected ? 1 : 0)).current;
 
   useEffect(() => {
@@ -41,12 +43,12 @@ function MoodOption({
 
   const backgroundColor = selectedAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: ['#F4F6F2', '#C9DEBF'],
+    outputRange: [theme.surfaceMuted, theme.nav],
   });
 
   const borderColor = selectedAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: ['#E4EAE0', '#B8D1AF'],
+    outputRange: [theme.border, theme.navIndicator],
   });
 
   return (
@@ -57,8 +59,8 @@ function MoodOption({
         pressed && styles.pressedOption,
       ]}>
       <Animated.View style={[styles.option, {backgroundColor, borderColor}]}>
-        <Text style={styles.face}>{face}</Text>
-        <Text style={styles.label}>{label}</Text>
+        <Text style={[styles.face, {color: theme.text}]}>{face}</Text>
+        <Text style={[styles.label, {color: theme.text}]}>{label}</Text>
       </Animated.View>
     </Pressable>
   );
@@ -113,12 +115,10 @@ const styles = StyleSheet.create({
     opacity: 0.75,
   },
   face: {
-    color: '#5D625B',
     fontSize: 22,
     lineHeight: 24,
   },
   label: {
-    color: '#4C5149',
     fontSize: 14,
     marginTop: 5,
   },

@@ -2,6 +2,7 @@ import React from 'react';
 import {Pressable, StyleSheet, Text, View} from 'react-native';
 import {Activity, HeartPulse} from 'lucide-react-native';
 
+import {useAppTheme} from '../../../theme/ThemeProvider';
 import type {MetricType} from '../types';
 
 interface MetricCardsProps {
@@ -23,6 +24,8 @@ export default function MetricCards({
   selectedMetric,
   onSelectMetric,
 }: MetricCardsProps) {
+  const {theme} = useAppTheme();
+
   return (
     <View style={styles.grid}>
       {metrics.map(({key, label, value, Icon}) => {
@@ -34,14 +37,31 @@ export default function MetricCards({
             onPress={() => onSelectMetric(key)}
             style={({pressed}) => [
               styles.card,
+              {backgroundColor: theme.surface, borderColor: theme.border},
               selected && styles.selectedCard,
+              selected && {
+                backgroundColor: theme.accent,
+                borderColor: theme.accent,
+              },
               pressed && styles.pressedCard,
             ]}>
-            <Icon color={selected ? '#FFFFFF' : '#E8A5B8'} size={22} />
-            <Text style={[styles.label, selected && styles.selectedText]}>
+            <Icon color={selected ? theme.accentText : theme.accent} size={22} />
+            <Text
+              style={[
+                styles.label,
+                {color: theme.text},
+                selected && styles.selectedText,
+                selected && {color: theme.accentText},
+              ]}>
               {label}
             </Text>
-            <Text style={[styles.value, selected && styles.selectedText]}>
+            <Text
+              style={[
+                styles.value,
+                {color: theme.text},
+                selected && styles.selectedText,
+                selected && {color: theme.accentText},
+              ]}>
               {value}
             </Text>
           </Pressable>
@@ -57,33 +77,26 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   card: {
-    backgroundColor: '#FFFFFF',
-    borderColor: '#E7ECE3',
     borderRadius: 16,
     borderWidth: 1,
     flex: 1,
     padding: 13,
   },
   selectedCard: {
-    backgroundColor: '#E8A5B8',
-    borderColor: '#E8A5B8',
   },
   pressedCard: {
     opacity: 0.8,
   },
   label: {
-    color: '#4B5149',
     fontSize: 12,
     fontWeight: '600',
     marginTop: 8,
   },
   value: {
-    color: '#2F352F',
     fontSize: 19,
     fontWeight: '800',
     marginTop: 3,
   },
   selectedText: {
-    color: '#FFFFFF',
   },
 });
