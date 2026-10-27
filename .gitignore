@@ -78,3 +78,9 @@ yarn-error.log
 .env
 .env.*
 !.env.example
+
+src/services/api/chatAiConfig.ts
+
+src/services/api/backendConfig.ts
+
+.wrangler/

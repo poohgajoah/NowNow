@@ -1,4 +1,5 @@
 const { createClient } = require("@supabase/supabase-js");
+const {AsyncLocalStorage} = require('node:async_hooks');
 require("dotenv").config();
 
 const supabaseUrl = process.env.SUPABASE_URL;
@@ -14,5 +15,19 @@ if (!supabaseKey) {
 }
 
 const supabase = createClient(supabaseUrl, supabaseKey);
-
-module.exports = supabase;
+const context = new AsyncLocalStorage();
+// User JWT + RLS is used per request. No service-role key is needed in the app.
+module.exports = new Proxy(supabase, {
+  get(target, property) {
+    if (property === 'withUser') return (token, next) => {
+      const client = createClient(supabaseUrl, process.env.SUPABASE_ANON_KEY || supabaseKey, {
+        global: {headers: {Authorization: `Bearer ${token}`}},
+        auth: {persistSession: false, autoRefreshToken: false}
+      });
+      return context.run(client, next);
+    };
+    const client = context.getStore() || target;
+    const value = client[property];
+    return typeof value === 'function' ? value.bind(client) : value;
+  }
+});

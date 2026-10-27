@@ -1,12 +1,12 @@
 import React, {useEffect, useMemo, useState} from 'react';
-import {ScrollView, StyleSheet, NativeModules, View, Text} from 'react-native';
+import {ScrollView, StyleSheet, NativeModules, View, Text, Pressable} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 
 import {Activity, Footprints, HeartPulse, Moon} from 'lucide-react-native';
 import HealthCard from './components/HealthCard';
-import InsightCard from './components/InsightCard';
 import ReportHeader from './components/ReportHeader';
 import StressCauseCard from './components/StressCauseCard';
+import StepsStatistics from './components/StepsStatistics';
 import TrendChart from './components/TrendChart';
 import WeeklyReport from './components/WeeklyReport';
 import {metricConfig} from './constants/reportData';
@@ -14,8 +14,7 @@ import {useReport} from './hooks/useReport';
 import type {ReportTab} from './types';
 import {SCREEN_BOTTOM_INSET, SCREEN_HORIZONTAL_PADDING} from '../../theme/layout';
 import {useAppTheme} from '../../theme/ThemeProvider';
-import {supabase} from '../../services/supabase';
-import {createMockHealthData} from '../../services/health/mockHealthData';
+import {syncHealth} from '../../services/health/sync';
 
 const {HealthConnectModule} = NativeModules;
 
@@ -51,121 +50,67 @@ export default function ReportPage() {
     setSelectedMetric,
     stressPeriod,
     setStressPeriod,
-    peakStress,
-    lowestStress,
+    daily,
+    recommendation,
+    reportStatus,
+    causeStatus,
     stressCauses,
   } = useReport();
 
   const [healthData, setHealthData] = useState<any>(null);
+  const [healthStatus, setHealthStatus] = useState('건강 데이터 조회 중');
+  const [connecting, setConnecting] = useState(false);
+  const connectHealth = async () => {
+    if (connecting) return;
+    setConnecting(true);
+    try {
+      if (!HealthConnectModule?.requestPermissions) {
+        setHealthStatus('Health Connect 설치/앱 업데이트가 필요합니다.');
+        return;
+      }
+      const allowed = await HealthConnectModule.requestPermissions();
+      if (!allowed) {
+        setHealthStatus('건강 읽기 권한이 일부 허용되지 않았습니다. 연결 버튼에서 권한을 확인해 주세요.');
+        return;
+      }
+      const data = await HealthConnectModule.getHealthData();
+      setHealthData(data);
+      setHealthStatus(data.heartRateSamples?.length || data.latestSleepMinutes || data.stepsTotal
+        ? 'Health Connect 실제 조회 데이터 · 항목별 미측정 값은 - 표시'
+        : '권한 허용 · 데이터 없음. 삼성 헬스의 Health Connect 데이터 쓰기 설정을 확인해 주세요.');
+      const syncErrors = await syncHealth(data);
+      if (syncErrors.length) setHealthStatus(syncErrors.join(' · '));
+    } catch {
+      setHealthStatus('건강 조회 실패 · Health Connect 설치/권한/삼성 헬스 연결을 확인해 주세요.');
+    } finally {
+      setConnecting(false);
+    }
+  };
 
   useEffect(() => {
     const loadHealthData = async () => {
       // 에뮬레이터처럼 Health Connect를 쓸 수 없는 개발 환경에서는 목업 데이터로 UI를 확인한다.
       if (!HealthConnectModule) {
-        if (__DEV__) setHealthData(createMockHealthData());
+        setHealthStatus('Health Connect 연결 필요 · 건강 데이터 없음');
         return;
       }
 
       try {
         const data = await HealthConnectModule.getHealthData();
-        console.log('Health data:', data);
-
         setHealthData(data);
-        await saveRawHealthData(data);
+        setHealthStatus(data.heartRateSamples?.length || data.latestSleepMinutes || data.stepsTotal
+          ? 'Health Connect 실제 조회 데이터 · 항목별 미측정 값은 - 표시'
+          : '조회 완료 · 저장된 건강 데이터 없음');
+        const syncErrors = await syncHealth(data);
+        if (syncErrors.length) setHealthStatus(syncErrors.join(' · '));
       } catch (e) {
         console.log('HealthConnect 에러:', e);
-        if (__DEV__) setHealthData(createMockHealthData());
+        setHealthStatus('건강 데이터 조회 실패 · Health Connect 권한/연결 확인 필요');
       }
     };
 
     loadHealthData();
   }, []);
-
-  const saveRawHealthData = async (data: any) => {
-    const {
-      data: {user},
-    } = await supabase.auth.getUser();
-
-    if (!user) return;
-
-    const userId = user.id;
-
-    // 실패해도 화면 표시는 계속하되, RLS·스키마 문제를 알 수 있게 로그는 남긴다.
-    const logSaveError = (table: string, error: {message: string} | null) => {
-      if (error) {
-        console.log(`[saveRawHealthData] ${table} 저장 실패:`, error.message);
-      }
-    };
-
-    if (data.heartRateSamples?.length > 0) {
-      const {error} = await supabase.from('heart_rate_records').upsert(
-        data.heartRateSamples.map((item: any) => ({
-          user_id: userId,
-          measured_at: item.time,
-          bpm: item.bpm,
-        })),
-        {onConflict: 'user_id,measured_at'},
-      );
-      logSaveError('heart_rate_records', error);
-    }
-
-    if (data.bloodPressureSamples?.length > 0) {
-      const {error} = await supabase.from('blood_pressure_records').upsert(
-        data.bloodPressureSamples.map((item: any) => ({
-          user_id: userId,
-          measured_at: item.time,
-          systolic: item.systolic,
-          diastolic: item.diastolic,
-        })),
-        {onConflict: 'user_id,measured_at'},
-      );
-      logSaveError('blood_pressure_records', error);
-    }
-
-    if (data.oxygenSamples?.length > 0) {
-      const {error} = await supabase.from('oxygen_records').upsert(
-        data.oxygenSamples.map((item: any) => ({
-          user_id: userId,
-          measured_at: item.time,
-          percentage: item.percentage,
-        })),
-        {onConflict: 'user_id,measured_at'},
-      );
-      logSaveError('oxygen_records', error);
-    }
-
-    // Health Connect는 걸음 수를 오늘 합계로만 준다(기기 간 중복 제거된 값).
-    // 하루 한 행(오늘 0시~내일 0시)으로 두고 다시 열 때마다 합계를 덮어쓴다.
-    if (typeof data.stepsTotal === 'number') {
-      const dayStart = new Date();
-      dayStart.setHours(0, 0, 0, 0);
-      const dayEnd = new Date(dayStart);
-      dayEnd.setDate(dayEnd.getDate() + 1);
-
-      const {error} = await supabase.from('steps_records').upsert(
-        {
-          user_id: userId,
-          start_time: dayStart.toISOString(),
-          end_time: dayEnd.toISOString(),
-          count: data.stepsTotal,
-        },
-        {onConflict: 'user_id,start_time,end_time'},
-      );
-      logSaveError('steps_records', error);
-    }
-
-    if (data.sleepSessions?.length > 0) {
-      const {error} = await supabase.from('sleep_records').upsert(
-        data.sleepSessions.map((item: any) => ({
-          user_id: userId,
-          start_time: item.startTime,
-          end_time: item.endTime,
-        })),
-        {onConflict: 'user_id,start_time,end_time'},
-      );
-      logSaveError('sleep_records', error);
-    }
-  };
 
   return (
     <SafeAreaView
@@ -187,6 +132,15 @@ export default function ReportPage() {
         </View>
 
         <ReportHeader tab={tab} onChangeTab={setTab} />
+        {tab === 'daily' && <Pressable accessibilityRole="button" disabled={connecting}
+          onPress={connectHealth} style={{paddingVertical: 12}}>
+          <Text style={{color: theme.accent, fontWeight: '700'}}>
+            {connecting ? '건강 데이터 연결 중…' : 'Health Connect 연결 / 새로고침'}
+          </Text>
+        </Pressable>}
+        <Text style={{color: theme.textMuted}}>
+          {tab === 'daily' ? healthStatus : '주간 리포트 · 본인 계정에 저장된 실제 기록'}
+        </Text>
 
     {tab === 'daily' ? (
     <>
@@ -208,7 +162,7 @@ export default function ReportPage() {
     <View style={styles.healthGrid}>
       <HealthCard
         title={metricConfig.heartRate.label}
-        value={formatNumber(healthData?.latestHeartRate)}
+        value={healthData?.latestHeartRate > 0 ? formatNumber(healthData.latestHeartRate) : '-'}
         unit={metricConfig.heartRate.unit}
         Icon={HeartPulse}
         selected={selectedMetric === 'heartRate'}
@@ -232,6 +186,12 @@ export default function ReportPage() {
       </View>
 
       <TrendChart selectedMetric={selectedMetric} healthData={healthData} />
+      <StepsStatistics refreshKey={healthData} />
+      <Text style={{color: theme.textMuted}}>{reportStatus}</Text>
+      <Text style={{color: theme.text}}>오늘 스트레스 지표: {daily?.finalDailyStressScore ?? '데이터 없음'}{daily?.finalDailyStressScore != null ? ' / 100' : ''}</Text>
+      {!!daily?.missing?.length && <Text style={{color: theme.textMuted}}>부족한 자료: {daily.missing.join(', ')}</Text>}
+      {!!recommendation?.message && <Text style={{color: theme.text}}>{recommendation.message}</Text>}
+      {!!recommendation?.routine && <Text style={{color: theme.text}}>{recommendation.routine.title}{'\n'}{recommendation.routine.steps.join('\n')}</Text>}
 
       <StressCauseCard
         causes={stressCauses}
@@ -239,11 +199,7 @@ export default function ReportPage() {
         onPeriodChange={setStressPeriod}
       />
 
-      <InsightCard
-        peakStress={peakStress}
-        lowestStress={lowestStress}
-        topCause={stressCauses[0]}
-      />
+      <Text style={{color: theme.textMuted}}>{causeStatus}</Text>
       </>
     ) : (
       <WeeklyReport />

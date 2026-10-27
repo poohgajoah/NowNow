@@ -17,7 +17,7 @@ async function requireUser(req, res, next) {
   }
 
   req.user = data.user;
-  next();
+  supabase.withUser(token, next);
 }
 
 module.exports = requireUser;
