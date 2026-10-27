@@ -1,12 +1,14 @@
-import React, { useEffect, useState } from "react";
-import AuthNavigator from "./AuthNavigator";
-import TabNavigator from "./TabNavigator";
-import { supabase } from "../services/supabase";
-import { ensureProfile } from "../services/api/profile";
-import { View, ActivityIndicator, StyleSheet } from "react-native";
-import { useAppTheme } from "../theme/ThemeProvider";
+import React, { useEffect, useState } from 'react';
+import ChatbotDemo from '../screens/Chat/ChatbotDemo';
+import { chatAiConfig } from '../services/api/chatAiConfig';
+import { ensureProfile } from '../services/api/profile';
+import AuthNavigator from './AuthNavigator';
+import TabNavigator from './TabNavigator';
+import { supabase } from '../services/supabase';
+import { View, ActivityIndicator, StyleSheet } from 'react-native';
+import { useAppTheme } from '../theme/ThemeProvider';
 
-export default function RootNavigator() {
+function AuthenticatedRoot() {
   const { theme } = useAppTheme();
   const [session, setSession] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -23,7 +25,7 @@ export default function RootNavigator() {
     const { data: listener } = supabase.auth.onAuthStateChange(
       (_event, nextSession) => {
         setSession(nextSession);
-      }
+      },
     );
 
     return () => listener.subscription.unsubscribe();
@@ -51,7 +53,15 @@ export default function RootNavigator() {
 const styles = StyleSheet.create({
   loading: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
+
+export default function RootNavigator() {
+  return chatAiConfig.demoMode === true ? (
+    <ChatbotDemo />
+  ) : (
+    <AuthenticatedRoot />
+  );
+}
