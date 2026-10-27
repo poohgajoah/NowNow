@@ -5,7 +5,8 @@ import { ensureProfile } from '../services/api/profile';
 import AuthNavigator from './AuthNavigator';
 import TabNavigator from './TabNavigator';
 import { supabase } from '../services/supabase';
-import { View, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, ActivityIndicator, StyleSheet, Pressable, Text } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAppTheme } from '../theme/ThemeProvider';
 
 function AuthenticatedRoot() {
@@ -15,9 +16,14 @@ function AuthenticatedRoot() {
 
   useEffect(() => {
     const init = async () => {
-      const { data } = await supabase.auth.getSession();
-      setSession(data?.session ?? null);
-      setLoading(false);
+      try {
+        const { data } = await supabase.auth.getSession();
+        setSession(data?.session ?? null);
+      } catch {
+        setSession(null);
+      } finally {
+        setLoading(false);
+      }
     };
 
     init();
@@ -59,9 +65,19 @@ const styles = StyleSheet.create({
 });
 
 export default function RootNavigator() {
-  return chatAiConfig.demoMode === true ? (
-    <ChatbotDemo />
-  ) : (
+  const [guest, setGuest] = useState(false);
+  const {theme} = useAppTheme();
+  if (chatAiConfig.demoMode !== true) return <AuthenticatedRoot />;
+  if (guest) return <ChatbotDemo onLogin={() => setGuest(false)} />;
+  return <View style={{flex: 1, backgroundColor: theme.background}}>
+    <SafeAreaView edges={['top']}>
+      <Text style={{color: theme.text, textAlign: 'center', padding: 8}}>
+        시연 빌드 · 로그인해도 대화는 이 폰에 공통 저장 · 팀 서버 저장 미연결
+      </Text>
+      <Pressable accessibilityRole="button" onPress={() => setGuest(true)}>
+        <Text style={{color: theme.accent, textAlign: 'center', padding: 10}}>로그인 없이 시연하기</Text>
+      </Pressable>
+    </SafeAreaView>
     <AuthenticatedRoot />
-  );
+  </View>;
 }
