@@ -4,14 +4,14 @@
 
 ## 실행 준비
 
-1. `src/services/api/chatAiConfig.example.ts`를 같은 폴더의 `chatAiConfig.ts`로 복사합니다.
+1. `frontend/src/services/api/chatAiConfig.example.ts`를 같은 폴더의 `chatAiConfig.ts`로 복사합니다.
 2. AI 서버의 HTTPS 주소와 서버 관리자가 전달한 데모 토큰을 입력합니다. 실제 값이 들어간 파일은 Git 업로드 대상에서 제외됩니다.
 3. `backendConfig.example.ts`를 `backendConfig.ts`로 복사하고 팀 백엔드 주소를 입력합니다. 빈 주소는 기존 에뮬레이터 설정을 사용합니다. S24에서 10.0.2.2는 PC 서버 주소로 사용할 수 없습니다.
 4. 기존 앱 설치 절차대로 의존성 설치와 Android 실행을 진행합니다. Supabase 로그인이 필요합니다.
 
 ## AI 서버
 
-이미 운영 중인 서버를 사용하면 재배포하지 않습니다. 별도 서버가 필요할 때만 `chatbot-server`의 Worker를 사용합니다. 서버 측 비밀 설정 `OPENAI_API_KEY`, `DEMO_TOKEN`과 `CHAT_LIMITER` 바인딩이 필요합니다. 실제 API 키를 앱에 넣지 않습니다. 템플릿의 서버 이름은 기존 운영 Worker와 다릅니다. 이 연결본은 서버를 배포하거나 기존 설정을 변경하지 않았습니다.
+이미 운영 중인 서버를 사용하면 재배포하지 않습니다. 별도 서버가 필요할 때만 `chatbot/server`의 Worker를 사용합니다. 서버 측 비밀 설정 `OPENAI_API_KEY`, `DEMO_TOKEN`과 `CHAT_LIMITER` 바인딩이 필요합니다. 실제 API 키를 앱에 넣지 않습니다. 템플릿의 서버 이름은 기존 운영 Worker와 다릅니다. 이 연결본은 서버를 배포하거나 기존 설정을 변경하지 않았습니다.
 
 POST /chat
 - Authorization: Bearer <AI 서버 데모 토큰>
@@ -23,7 +23,7 @@ Supabase 세션 토큰은 팀 백엔드에 전달합니다. AI 데모 토큰은 
 
 ## 기존 DB API 연결
 
-`src/services/api/chat.ts`의 기존 POST/GET `/api/chat/messages`를 재사용합니다. AI 역할 문자열 `AI`는 기존 코드의 계약이며, 백엔드 담당자 확인이 필요합니다. 서버 구현과 DB 스키마는 이 저장소에서 확인되지 않았고 실제 저장 성공 여부도 검증하지 않았습니다.
+`frontend/src/services/api/chat.ts`의 기존 POST/GET `/api/chat/messages`를 재사용합니다. AI 역할 문자열 `AI`는 기존 코드의 계약이며, 백엔드 담당자 확인이 필요합니다. 서버 구현과 DB 스키마는 이 저장소에서 확인되지 않았고 실제 저장 성공 여부도 검증하지 않았습니다.
 
 화면 진입 시 대화 조회 → 입력 → AI 요청 → 사용자·AI 메시지 순차 저장으로 연결됩니다. 저장 실패는 표시하고 다시 저장 버튼을 제공합니다. 다시 저장할 때 AI를 재호출하지 않습니다. 미저장 큐는 현재 화면 메모리에 있으므로 저장 전에 앱을 종료하면 유실될 수 있습니다. 서버가 저장 후 응답을 잃는 경우 재시도 중복을 막으려면 백엔드의 idempotency 지원이 필요합니다.
 
@@ -39,7 +39,7 @@ Supabase 세션 토큰은 팀 백엔드에 전달합니다. AI 데모 토큰은 
 
 원본 main에는 직접 올리지 않습니다. 팀 저장소에 작업 브랜치를 올리거나 개인 저장소에 이 변경분을 공유합니다. `.gitignore`가 적용되는 GitHub Desktop으로 파일 목록을 확인하고 Commit → Publish/Push합니다. 웹 드래그 업로드는 제외 설정을 자동으로 적용하지 않습니다. 실제 설정 파일, node_modules, 빌드 폴더, 개인 대화·건강 자료는 올리지 않습니다.
 
-검증 결과는 `CHATBOT_VALIDATION.txt`를 확인합니다.
+검증 결과는 `chatbot/VALIDATION.txt`를 확인합니다.
 
 
 ## 내일 발표용 챗봇 단독 시연

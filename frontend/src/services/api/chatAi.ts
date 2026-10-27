@@ -14,7 +14,7 @@ export async function requestReply(
 ): Promise<string> {
   if (!cloudConfig.url || !cloudConfig.token)
     throw new Error(
-      'AI 연결 설정이 필요합니다. CHATBOT_INTEGRATION.md를 확인해 주세요.',
+      'AI 연결 설정이 필요합니다. chatbot/INTEGRATION.md를 확인해 주세요.',
     );
   if (!message.trim() || message.length > 2000)
     throw new Error('메시지는 1~2000자로 입력해 주세요.');

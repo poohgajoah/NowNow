@@ -39,7 +39,7 @@
 
 ### 1-1. 시간대별 스트레스 · 일일 스트레스 점수 (P0)
 
-**지금 상태**: [`reportData.ts`](../src/screens/Report/constants/reportData.ts)의 `todayHRVData` 고정 배열을 씁니다.
+**지금 상태**: [`reportData.ts`](../frontend/src/screens/Report/constants/reportData.ts)의 `todayHRVData` 고정 배열을 씁니다.
 이 배열에서 "가장 스트레스가 높은 시간"과 "가장 안정적인 시간" 카드를 계산합니다.
 
 **화면에서 쓰는 값**: 시각, 스트레스 수치(0~100), 그 시각의 메모(예: "프로젝트 회의").
@@ -93,7 +93,7 @@ GET /reports/stress-causes?period=week     # week | month
 
 ### 1-3. AI 추천 문구 · 맞춤 루틴 (P1)
 
-**지금 상태**: [`InsightCard.tsx`](../src/screens/Report/components/InsightCard.tsx)에서
+**지금 상태**: [`InsightCard.tsx`](../frontend/src/screens/Report/components/InsightCard.tsx)에서
 `"이번 기록에서는 {원인}이 가장 크게 나타났어요. 짧은 호흡 루틴이나 10분 산책이 도움이 될 수 있어요."`를 템플릿으로 만듭니다.
 "맞춤형 루틴 시작하기" 버튼은 **눌러도 아무 동작이 없습니다.**
 
@@ -140,7 +140,7 @@ GET /reports/weekly/2026-10-12
 
 ### 참고: 건강 원본 데이터 (앱 → DB, 이미 연결됨)
 
-심박·혈압·산소포화도는 앱이 Health Connect에서 읽어 Supabase에 **직접 upsert**합니다([`ReportPage.tsx`](../src/screens/Report/ReportPage.tsx)). 1-1 스트레스 계산의 입력으로 쓰시면 됩니다.
+심박·혈압·산소포화도는 앱이 Health Connect에서 읽어 Supabase에 **직접 upsert**합니다([`ReportPage.tsx`](../frontend/src/screens/Report/ReportPage.tsx)). 1-1 스트레스 계산의 입력으로 쓰시면 됩니다.
 
 | 테이블 | 컬럼 | upsert 기준 |
 | --- | --- | --- |
@@ -150,14 +150,14 @@ GET /reports/weekly/2026-10-12
 
 - **걸음 수와 수면은 아직 저장하지 않습니다.** 앱 화면에는 표시되지만 DB에는 없습니다. 스트레스 점수 공식에 걸음·수면이 들어가므로 테이블이 필요합니다(앱 쪽 저장 코드는 제가 붙이겠습니다).
   - 제안: `step_records(user_id, date, steps_total)`, `sleep_records(user_id, start_time, end_time, minutes)`
-- 에뮬레이터 개발 환경에서는 [`mockHealthData.ts`](../src/services/health/mockHealthData.ts) 목업을 화면에만 쓰고, DB에는 저장하지 않습니다.
+- 에뮬레이터 개발 환경에서는 [`mockHealthData.ts`](../frontend/src/services/health/mockHealthData.ts) 목업을 화면에만 쓰고, DB에는 저장하지 않습니다.
 
 ---
 
 ## 2. 채팅 화면
 
-**지금 상태**: AI와 전혀 연결되어 있지 않습니다. 봇 대사는 모두 [`chatScript.ts`](../src/screens/Chat/constants/chatScript.ts)의 고정 문장이고,
-요약 키워드는 [`analyzeStory.ts`](../src/screens/Chat/utils/analyzeStory.ts)에서 "팀장/부장/상사", "야근" 같은 단어가 들어 있는지만 보고 만듭니다.
+**지금 상태**: AI와 전혀 연결되어 있지 않습니다. 봇 대사는 모두 [`chatScript.ts`](../frontend/src/screens/Chat/constants/chatScript.ts)의 고정 문장이고,
+요약 키워드는 [`analyzeStory.ts`](../frontend/src/screens/Chat/utils/analyzeStory.ts)에서 "팀장/부장/상사", "야근" 같은 단어가 들어 있는지만 보고 만듭니다.
 대화 기록도 저장하지 않아서 화면을 나가면 사라집니다.
 
 현재 앱의 대화 흐름:
@@ -271,7 +271,7 @@ GET /moods/2026-10-20   →  { "date": "2026-10-20", "mood": "happy", "updatedAt
 ### 3-2. 캐릭터 상호작용 · 취향 (P1)
 
 **지금 상태**: "먹이 주기 / 놀아 주기 / 음악 듣기 / 휴식 취하기"에서 고른 선택이 화면에만 남고 저장되지 않습니다.
-선택지 목록은 [`preferenceOptions.ts`](../src/screens/Home/constants/preferenceOptions.ts)에 고정돼 있습니다.
+선택지 목록은 [`preferenceOptions.ts`](../frontend/src/screens/Home/constants/preferenceOptions.ts)에 고정돼 있습니다.
 
 ```
 POST /character/interactions    { "action": "feed", "choice": "매운 닭발" }
