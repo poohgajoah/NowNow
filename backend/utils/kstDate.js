@@ -51,8 +51,17 @@ function datesBetween(from, to) {
   return dates;
 }
 
+// now부터 다음 한국 시간 hour시 정각까지 남은 ms. 정각과 같으면 다음날로 넘긴다.
+function msUntilNextKstHour(hour, now = Date.now()) {
+  const kstNow = now + KST_OFFSET_MS;
+  const todayTarget = Math.floor(kstNow / DAY_MS) * DAY_MS + hour * HOUR_MS;
+  const target = todayTarget > kstNow ? todayTarget : todayTarget + DAY_MS;
+  return target - kstNow;
+}
+
 module.exports = {
   HOUR_MS,
+  msUntilNextKstHour,
   toKstIso,
   kstDateOf,
   isDate,

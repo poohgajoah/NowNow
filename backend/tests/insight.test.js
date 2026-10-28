@@ -7,6 +7,7 @@ const {
   isDate,
   kstDateOf,
   kstDayRange,
+  msUntilNextKstHour,
   weekStartOf
 } = require("../utils/kstDate");
 const {
@@ -34,6 +35,19 @@ test("한국 시간 날짜 계산", () => {
     start: "2026-10-19T15:00:00.000Z",
     end: "2026-10-26T15:00:00.000Z"
   });
+});
+
+test("다음 03:00(한국 시간)까지 남은 시간", () => {
+  const at = iso => Date.parse(iso);
+  const HOUR = 3600000;
+  // 02:00 KST → 1시간 뒤
+  assert.equal(msUntilNextKstHour(3, at("2026-10-28T02:00:00+09:00")), HOUR);
+  // 03:00 정각 → 다음날 03:00
+  assert.equal(msUntilNextKstHour(3, at("2026-10-28T03:00:00+09:00")), 24 * HOUR);
+  // 15:30 KST → 11시간 30분 뒤
+  assert.equal(msUntilNextKstHour(3, at("2026-10-28T15:30:00+09:00")), 11.5 * HOUR);
+  // 23:59 KST(UTC로는 같은 날 14:59) → 3시간 1분 뒤
+  assert.equal(msUntilNextKstHour(3, at("2026-10-28T23:59:00+09:00")), 3 * HOUR + 60000);
 });
 
 test("주 시작은 월요일", () => {
