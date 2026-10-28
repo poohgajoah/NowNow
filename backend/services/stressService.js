@@ -56,8 +56,9 @@ async function fetchHealthData(user_id, { start, end }) {
 }
 
 // 계산한 점수를 daily_stress_scores에 저장한다. 주간 리포트·추세 조회용 기록이라
-// 저장에 실패해도 응답은 그대로 돌려준다.
-async function saveScores(user_id, results) {
+// API 응답에서는 저장에 실패해도 결과를 그대로 돌려준다. 새벽 일괄 계산처럼
+// 저장이 목적이면 throwOnError로 실패를 알린다.
+async function saveScores(user_id, results, { throwOnError = false } = {}) {
   const rows = results
     .filter(result => result.finalDailyStressScore !== null)
     .map(result => ({
@@ -86,6 +87,7 @@ async function saveScores(user_id, results) {
     .upsert(rows, { onConflict: "user_id,record_date" });
 
   if (error) {
+    if (throwOnError) throw new Error(`점수 저장 실패: ${error.message}`);
     console.error("[stressService] 점수 저장 실패:", error.message);
   }
 }
@@ -133,8 +135,18 @@ async function getDailyStressRange(user_id, from, to) {
   return results;
 }
 
+// 하루 점수를 계산해서 저장한다. 저장에 실패하면 에러를 던진다(새벽 일괄 계산용).
+async function calculateAndSaveDay(user_id, date) {
+  const data = await fetchHealthData(user_id, getRange(date, date));
+  const [result] = calculateByDate([date], data);
+  await saveScores(user_id, [result], { throwOnError: true });
+
+  return result;
+}
+
 module.exports = {
   getRealtimeStress,
   getDailyStress,
-  getDailyStressRange
+  getDailyStressRange,
+  calculateAndSaveDay
 };
