@@ -78,3 +78,6 @@ yarn-error.log
 .env
 .env.*
 !.env.example
+
+# Backend secret files (Firebase service account etc.)
+backend/secrets/

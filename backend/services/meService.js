@@ -1,12 +1,15 @@
 const supabase = require("../config/supabase");
+const { DEFAULT_NOTIFY_TIME } = require("../utils/settings");
 
 const SETTINGS_COLUMNS =
   "nickname, status_message, character_type, notification_enabled, notify_time, stress_threshold";
 
 // notify_time은 DB에서 "HH:MM:SS"로 오므로 "HH:MM"으로 맞춘다.
+// 정하지 않은 값은 실제로 적용되는 기본값으로 보여 준다(알림 켜짐, 23:00).
 const toSettings = row => ({
   ...row,
-  notify_time: row.notify_time ? row.notify_time.slice(0, 5) : null
+  notification_enabled: row.notification_enabled ?? true,
+  notify_time: row.notify_time ? row.notify_time.slice(0, 5) : DEFAULT_NOTIFY_TIME
 });
 
 async function getSettings(user_id) {

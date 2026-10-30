@@ -12,6 +12,7 @@ const {
 } = require("../utils/kstDate");
 const {
   buildRecommendation,
+  COMFORT_MESSAGES,
   countCauses,
   summarizeDays
 } = require("../services/insightCalculator");
@@ -98,8 +99,7 @@ test("추천: 원인별 루틴, 원인이 없으면 점수 수준으로", () => 
   const night = buildRecommendation({ score: 82, topCause: "야근" });
   assert.equal(night.level, "high");
   assert.equal(night.routine.id, "routine_stretch_10m");
-  assert.match(night.message, /높은 편/);
-  assert.match(night.message, /'야근'/);
+  assert.ok(COMFORT_MESSAGES.high.includes(night.message));
 
   assert.equal(
     buildRecommendation({ score: 75, topCause: null }).routine.id,
@@ -115,6 +115,26 @@ test("추천: 원인별 루틴, 원인이 없으면 점수 수준으로", () => 
   const empty = buildRecommendation({ score: null, topCause: null });
   assert.equal(empty.level, null);
   assert.equal(empty.routine, null);
+  assert.ok(COMFORT_MESSAGES.none.includes(empty.message));
+});
+
+test("위로 문구: 수준별 5개 중 무작위로 하나", () => {
+  for (const level of ["high", "medium", "low", "none"]) {
+    assert.equal(COMFORT_MESSAGES[level].length, 5);
+  }
+  // random 값에 따라 처음·마지막 문구가 골라진다
+  assert.equal(
+    buildRecommendation({ score: 50, topCause: null }, () => 0).message,
+    COMFORT_MESSAGES.medium[0]
+  );
+  assert.equal(
+    buildRecommendation({ score: 50, topCause: null }, () => 0.999).message,
+    COMFORT_MESSAGES.medium[4]
+  );
+  assert.equal(
+    buildRecommendation({ score: 10, topCause: null }, () => 0.5).message,
+    COMFORT_MESSAGES.low[2]
+  );
 });
 
 test("여러 날 계산: 날짜별로 나누고 수면은 끝난 날, 걸음 수는 시작한 날", () => {

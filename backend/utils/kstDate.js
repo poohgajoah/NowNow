@@ -15,6 +15,9 @@ const kstDateOf = value =>
 
 const startMsOf = date => Date.parse(`${date}T00:00:00+09:00`);
 
+// 타임스탬프(ms)의 한국 시간 "HH:MM"
+const kstTimeOf = ms => toKstIso(ms).slice(11, 16);
+
 // 형식뿐 아니라 2월 30일 같은 없는 날짜도 걸러낸다.
 function isDate(value) {
   if (typeof value !== "string" || !DATE_RE.test(value)) return false;
@@ -64,6 +67,7 @@ module.exports = {
   msUntilNextKstHour,
   toKstIso,
   kstDateOf,
+  kstTimeOf,
   isDate,
   kstDayRange,
   addDays,

@@ -1,4 +1,6 @@
 const chatService = require("../services/chatService");
+const chatRelayService = require("../services/chatRelayService");
+const { createRateLimiter, parseChatRequest } = require("../utils/chatRelay");
 
 async function createMessage(req, res) {
   try {
@@ -140,10 +142,41 @@ async function getSummaries(req, res) {
   }
 }
 
+// AI 서버 공유 한도(전체 분당 5회)를 한 사람이 다 쓰지 않게 사용자별로도 막는다.
+const allowReply = createRateLimiter(5);
+
+async function reply(req, res) {
+  try {
+    const { message, history, error } = parseChatRequest(req.body);
+
+    if (error) {
+      return res.status(400).json({ message: error });
+    }
+
+    if (!allowReply(req.user.id)) {
+      return res.status(429).json({
+        message: "메시지를 너무 빨리 보냈어요. 1분 뒤에 다시 시도해 주세요."
+      });
+    }
+
+    const answer = await chatRelayService.requestReply(message, history);
+
+    res.json({
+      message: "AI 답변 성공",
+      data: { reply: answer }
+    });
+  } catch (error) {
+    res.status(error.status ?? 500).json({
+      message: error.status ? error.message : "AI 답변 실패"
+    });
+  }
+}
+
 module.exports = {
   createMessage,
   getMessages,
   deleteMessage,
   createSummary,
-  getSummaries
+  getSummaries,
+  reply
 };
