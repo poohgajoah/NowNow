@@ -3,6 +3,10 @@ import AuthNavigator from "./AuthNavigator";
 import TabNavigator from "./TabNavigator";
 import { supabase } from "../services/supabase";
 import { ensureProfile } from "../services/api/profile";
+import {
+  cancelDailyReminder,
+  syncDailyReminder,
+} from "../services/notifications/dailyReminder";
 import { View, ActivityIndicator, StyleSheet } from "react-native";
 import { useAppTheme } from "../theme/ThemeProvider";
 
@@ -36,6 +40,19 @@ export default function RootNavigator() {
       ensureProfile(user);
     }
   }, [user]);
+
+  // 로그인하면 설정대로 하루 마무리 알림을 폰에 예약하고, 로그아웃하면 끈다.
+  const userId = user?.id;
+  useEffect(() => {
+    if (loading) return;
+    if (userId) {
+      syncDailyReminder(userId).catch(error =>
+        console.log('[dailyReminder] 예약 실패:', error?.message),
+      );
+    } else {
+      cancelDailyReminder().catch(() => {});
+    }
+  }, [loading, userId]);
 
   if (loading) {
     return (

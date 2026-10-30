@@ -11,7 +11,8 @@ class HealthConnectPackage : ReactPackage {
         reactContext: ReactApplicationContext
     ): MutableList<NativeModule> {
         return mutableListOf(
-            HealthConnectModule(reactContext)
+            HealthConnectModule(reactContext),
+            DailyReminderModule(reactContext)
         )
     }
 

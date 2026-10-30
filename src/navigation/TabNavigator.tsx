@@ -9,6 +9,7 @@ import {
   Pressable,
   Animated,
   LayoutChangeEvent,
+  Linking,
   StyleSheet,
   Text,
   View,
@@ -62,6 +63,17 @@ export default function TabNavigator() {
   const indicatorAnim = useRef(new Animated.Value(0)).current;
   const {theme} = useAppTheme();
   const activeIndex = tabs.findIndex(tab => tab.key === activeTab);
+
+  // 하루 마무리 알림을 누르면 nownow://chat 으로 열린다 → 채팅 탭으로 이동.
+  useEffect(() => {
+    const openChatLink = (url: string | null) => {
+      if (url?.startsWith('nownow://chat')) setActiveTab('Chat');
+    };
+
+    Linking.getInitialURL().then(openChatLink);
+    const subscription = Linking.addEventListener('url', ({url}) => openChatLink(url));
+    return () => subscription.remove();
+  }, []);
 
   useEffect(() => {
     Animated.spring(indicatorAnim, {
