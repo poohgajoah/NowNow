@@ -3,6 +3,9 @@
 
 const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
 
+// 알림 시각을 정하지 않은 사용자는 이 시각에 받는다. 알림 켜기/끄기를 정하지 않았으면 켠 것으로 본다.
+const DEFAULT_NOTIFY_TIME = "23:00";
+
 function parseSettingsUpdate(body) {
   if (!body || typeof body !== "object" || Array.isArray(body)) {
     return { error: "요청 본문이 필요합니다." };
@@ -43,7 +46,7 @@ function parseSettingsUpdate(body) {
     updates.notification_enabled = body.notification_enabled;
   }
 
-  // 알림 시각 "HH:MM", null이면 지운다
+  // 알림 시각 "HH:MM", null이면 기본 시각(DEFAULT_NOTIFY_TIME)으로 되돌린다
   if ("notify_time" in body) {
     if (body.notify_time !== null && !TIME_RE.test(body.notify_time)) {
       return { error: "notify_time은 HH:MM 형식 또는 null이어야 합니다." };
@@ -67,4 +70,4 @@ function parseSettingsUpdate(body) {
   return { updates };
 }
 
-module.exports = { parseSettingsUpdate };
+module.exports = { DEFAULT_NOTIFY_TIME, parseSettingsUpdate };

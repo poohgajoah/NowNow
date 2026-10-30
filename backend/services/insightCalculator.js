@@ -129,39 +129,62 @@ function stressLevel(score) {
  * 오늘 점수와 최근 가장 많이 나온 원인으로 추천 문구와 루틴을 고른다.
  * 루틴이 없으면 null (앱이 루틴 버튼을 숨긴다).
  */
-function buildRecommendation({ score, topCause }) {
+// 스트레스 수준별 위로·응원 문구. 추천 API가 이 중 하나를 무작위로 고른다(AI 사용 안 함).
+const COMFORT_MESSAGES = {
+  high: [
+    "오늘 정말 애썼어요. 힘든 하루를 버틴 것만으로도 충분히 잘한 거예요.",
+    "마음이 많이 무거웠죠? 지금은 잠깐 숨 고르고 쉬어 가도 괜찮아요.",
+    "버거운 날엔 다 잘하려고 하지 않아도 돼요. 오늘은 나를 먼저 챙겨 주세요.",
+    "지친 마음도 쉬면 다시 가벼워져요. 오늘 하루 정말 수고 많았어요.",
+    "혼자 다 짊어지지 않아도 괜찮아요. 뿡뿡이가 옆에서 응원하고 있어요."
+  ],
+  medium: [
+    "조금 지치는 하루였죠? 따뜻한 차 한 잔으로 나를 토닥여 주세요.",
+    "오늘도 할 일을 해낸 당신, 충분히 잘하고 있어요.",
+    "피곤함이 느껴진다면 오늘은 조금 일찍 쉬어 보는 건 어때요?",
+    "작은 쉼표 하나가 내일을 가볍게 만들어 줄 거예요.",
+    "애쓴 만큼 쉬는 것도 중요해요. 오늘 하루도 고생했어요."
+  ],
+  low: [
+    "오늘은 마음이 비교적 편안한 하루였네요. 이 기분을 오래 간직해요.",
+    "안정적인 하루를 보냈어요. 스스로를 잘 돌보고 있다는 증거예요.",
+    "편안한 오늘처럼 내일도 가볍게 시작할 수 있을 거예요.",
+    "좋은 하루였네요! 오늘 나를 웃게 한 일을 하나 떠올려 보세요.",
+    "잔잔한 하루도 소중해요. 지금의 리듬을 그대로 이어 가요."
+  ],
+  none: [
+    "오늘 하루는 어땠나요? 뿡뿡이에게 편하게 이야기해 주세요.",
+    "기록이 아직 적어도 괜찮아요. 오늘의 나를 천천히 돌아봐요.",
+    "어떤 하루였든 여기까지 온 당신, 수고했어요.",
+    "마음이 궁금한 날엔 짧게라도 오늘을 남겨 보세요.",
+    "작은 기록이 쌓이면 나를 더 잘 알 수 있어요. 오늘도 함께해요."
+  ]
+};
+
+// random은 0 이상 1 미만을 돌려주는 함수(테스트에서 바꿔 끼운다).
+const pickOne = (list, random) => list[Math.floor(random() * list.length)];
+
+/**
+ * 오늘 점수 수준에 맞는 위로 문구 하나(무작위)와 최근 가장 많이 나온 원인에 맞는 루틴을 고른다.
+ * 루틴이 없으면 null (앱이 루틴 버튼을 숨긴다).
+ */
+function buildRecommendation({ score, topCause }, random = Math.random) {
   const level = stressLevel(score);
-  const parts = [];
-
-  if (level === "high") {
-    parts.push(`오늘 스트레스가 높은 편이에요(${score}점).`);
-  } else if (level === "medium") {
-    parts.push(`오늘 스트레스는 보통 수준이에요(${score}점).`);
-  } else if (level === "low") {
-    parts.push(`오늘은 비교적 안정적인 하루예요(${score}점).`);
-  } else {
-    parts.push("오늘 건강 기록이 아직 충분하지 않아요.");
-  }
-
-  if (topCause) {
-    parts.push(`최근 일주일 대화에서는 '${topCause}' 이야기가 가장 많았어요.`);
-  }
 
   let routineKey = topCause ? ROUTINE_BY_CAUSE[topCause] : null;
   if (!routineKey && level === "high") routineKey = "breathing";
   if (!routineKey && level === "medium") routineKey = "walk";
 
-  const routine = routineKey ? ROUTINES[routineKey] : null;
-
-  if (routine) {
-    parts.push(`잠깐 쉬어 가고 싶다면 '${routine.title}' 루틴을 해 보는 건 어떨까요?`);
-  }
-
-  return { level, message: parts.join(" "), routine };
+  return {
+    level,
+    message: pickOne(COMFORT_MESSAGES[level ?? "none"], random),
+    routine: routineKey ? ROUTINES[routineKey] : null
+  };
 }
 
 module.exports = {
   CAUSE_KEYWORDS,
+  COMFORT_MESSAGES,
   ROUTINES,
   countCauses,
   summarizeDays,
