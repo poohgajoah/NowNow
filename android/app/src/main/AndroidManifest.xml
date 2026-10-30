@@ -1,7 +1,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    
+
+    <!-- 하루 마무리 알림 (폰에서 예약) -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+
     <!-- 헬스커넥트 데이터 권한확보용 -->
     <uses-permission android:name="android.permission.health.READ_STEPS" />
     <uses-permission android:name="android.permission.health.READ_HEART_RATE" />
@@ -29,7 +34,24 @@
             <action android:name="android.intent.action.MAIN" />
             <category android:name="android.intent.category.LAUNCHER" />
         </intent-filter>
+        <!-- 알림을 누르면 nownow://chat 으로 채팅 탭을 연다 -->
+        <intent-filter>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.DEFAULT" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data android:scheme="nownow" android:host="chat" />
+        </intent-filter>
       </activity>
+      <receiver android:name=".DailyReminderReceiver" android:exported="false" />
+      <!-- 재부팅·앱 업데이트·시간 변경 뒤 알림 다시 예약 -->
+      <receiver android:name=".DailyReminderRescheduleReceiver" android:exported="false">
+        <intent-filter>
+          <action android:name="android.intent.action.BOOT_COMPLETED" />
+          <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+          <action android:name="android.intent.action.TIME_SET" />
+          <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+        </intent-filter>
+      </receiver>
       <activity-alias
         android:name="ViewPermissionUsageActivity"
         android:exported="true"
