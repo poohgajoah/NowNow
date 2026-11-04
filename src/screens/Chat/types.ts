@@ -6,10 +6,9 @@ export type ChatAction =
   | 'solution_yes'
   | 'solution_no'
   | 'home'
-  | 'meditation'
-  | 'community';
+  | 'meditation';
 
-export type ReliefAction = Extract<ChatAction, 'home' | 'meditation' | 'community'>;
+export type ReliefAction = Extract<ChatAction, 'home' | 'meditation'>;
 
 export interface MessageButton {
   label: string;

@@ -134,7 +134,6 @@ export const useChatDiary = () => {
         break;
       case 'home':
       case 'meditation':
-      case 'community':
         appendMessages(createMessage('bot', reliefResponses[action]));
         break;
     }

@@ -249,7 +249,7 @@ npm run ios
 src
 ├─ navigation/     # Root(세션 분기) · Auth · Tab 네비게이터
 ├─ screens/        # 화면별 폴더 (컴포넌트·훅·상수·타입을 화면 안에 둠)
-│   ├─ Home/ Chat/ Report/ Profile/ Login/ Community/
+│   ├─ Home/ Chat/ Report/ Profile/ Login/
 ├─ services/       # supabase 클라이언트, API, health/ (에뮬레이터용 목업)
 ├─ theme/          # ThemeProvider (라이트/다크), colors, spacing
 └─ assets/

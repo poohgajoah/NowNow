@@ -38,11 +38,9 @@ export const solutionButtons: MessageButton[] = [
 export const reliefButtons: MessageButton[] = [
   {label: '편안한 우리집', action: 'home'},
   {label: '명상', action: 'meditation'},
-  {label: '커뮤니티에 털어놓기', action: 'community'},
 ];
 
 export const reliefResponses: Record<ReliefAction, string> = {
   home: '편안한 조명과 온도로 집안 분위기를 조성해드릴게요.',
   meditation: '명상 도우미를 실행할게요.',
-  community: '커뮤니티로 이동합니다.',
 };
