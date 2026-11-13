@@ -13,6 +13,7 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import Text from '../components/AppText';
 
 import {useKeyboardVisible} from '../hooks/useKeyboardVisible';
@@ -21,9 +22,7 @@ import HomePage from '../screens/Home/HomePage';
 import MyPage from '../screens/Profile/MyPage';
 import ReportPage from '../screens/Report/ReportPage';
 import {TAB_BAR} from '../theme/layout';
-import {shadows} from '../theme/shadows';
 import {useAppTheme} from '../theme/ThemeProvider';
-import type {MoodType} from '../screens/Home/types';
 
 type TabKey = 'Home' | 'Chat' | 'Report' | 'Settings';
 
@@ -38,14 +37,12 @@ const tabs: {
   {key: 'Settings', label: '내 설정', Icon: UserRound},
 ];
 
-const renderScreen = (activeTab: TabKey, setActiveTab: (tab: TabKey) => void, invite: 'play' | 'weather' | null,
-  mood: MoodType | null, onMoodSelected: (mood: MoodType) => void) => {
+const renderScreen = (activeTab: TabKey, setActiveTab: (tab: TabKey) => void, invite: 'play' | 'weather' | null) => {
   if (activeTab === 'Chat') {
     return (
       <ChatPage
         date={new Date().toISOString()}
         invite={invite}
-        mood={mood}
         onBack={() => setActiveTab('Home')}
       />
     );
@@ -59,20 +56,19 @@ const renderScreen = (activeTab: TabKey, setActiveTab: (tab: TabKey) => void, in
     return <MyPage />;
   }
 
-  return <HomePage onMoodSelected={onMoodSelected} />;
+  return <HomePage />;
 };
 
 export default function TabNavigator() {
   const [activeTab, setActiveTab] = useState<TabKey>('Home');
   const [invite, setInvite] = useState<'play' | 'weather' | null>(null);
-  const [moodSelection, setMoodSelection] = useState<{day: string; mood: MoodType} | null>(null);
-  const day = new Date().toLocaleDateString('en-CA', {timeZone: 'Asia/Seoul'});
   const [tabWidth, setTabWidth] = useState(0);
   const indicatorAnim = useRef(new Animated.Value(0)).current;
   const {theme} = useAppTheme();
   const activeIndex = tabs.findIndex(tab => tab.key === activeTab);
   // 키보드가 올라오면 탭바가 키보드 위로 떠서 입력창을 가리므로 그동안 숨긴다.
   const keyboardVisible = useKeyboardVisible();
+  const insets = useSafeAreaInsets();
 
   // 하루 마무리 알림을 누르면 nownow://chat 으로 열린다 → 채팅 탭으로 이동.
   useEffect(() => {
@@ -108,12 +104,19 @@ export default function TabNavigator() {
       <View style={styles.screen}>{renderScreen(activeTab, tab => {
         setInvite(null);
         setActiveTab(tab);
-      }, invite, moodSelection?.day === day ? moodSelection.mood : null,
-      mood => setMoodSelection({day, mood}))}</View>
+      }, invite)}</View>
 
       {!keyboardVisible && (
       <View
-        style={[styles.tabBar, {backgroundColor: theme.nav}]}
+        // 화면 폭을 꽉 채우고 폰 제스처 바 영역까지 탭바 색으로 채운다.
+        style={[
+          styles.tabBar,
+          {
+            backgroundColor: theme.nav,
+            borderTopColor: theme.border,
+            paddingBottom: insets.bottom,
+          },
+        ]}
         onLayout={handleTabBarLayout}>
         {tabWidth > 0 && (
           <Animated.View
@@ -169,18 +172,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   tabBar: {
-    ...shadows.floating,
-    alignItems: 'center',
-    borderRadius: TAB_BAR.height / 2,
-    bottom: TAB_BAR.bottomOffset,
+    alignItems: 'flex-start',
+    borderTopWidth: StyleSheet.hairlineWidth,
     flexDirection: 'row',
-    height: TAB_BAR.height,
     justifyContent: 'space-around',
-    left: TAB_BAR.sideInset,
     paddingHorizontal: TAB_BAR.padding,
-    paddingVertical: 6,
-    position: 'absolute',
-    right: TAB_BAR.sideInset,
+    paddingTop: TAB_BAR.padding,
   },
   activeIndicator: {
     borderRadius: 24,
@@ -192,7 +189,7 @@ const styles = StyleSheet.create({
   tabItem: {
     alignItems: 'center',
     flex: 1,
-    height: 58,
+    height: TAB_BAR.height - TAB_BAR.padding * 2,
     justifyContent: 'center',
     zIndex: 1,
   },

@@ -3,26 +3,20 @@ import {Animated, Pressable, StyleSheet, View} from 'react-native';
 import {Check} from 'lucide-react-native';
 
 import Text from '../../../components/AppText';
-import {shadows} from '../../../theme/shadows';
 import {useAppTheme} from '../../../theme/ThemeProvider';
 import {completedMessages, interactionActions} from '../constants/homeContent';
 import type {PreferenceKey, UserPreferences} from '../types';
 
-interface SideActionsProps {
+interface ActionBarProps {
   completedPreferences: UserPreferences;
   selectedAction: PreferenceKey | null;
   onActionSelect: (action: PreferenceKey) => void;
   onCancel: () => void;
 }
 
-const BUTTON_SIZE = 54;
-const FLOAT_DURATION = 1300;
+const BOUNCE_DURATION = 1300;
 
-// 방 왼쪽·오른쪽에 두 개씩
-const LEFT = interactionActions.slice(0, 2);
-const RIGHT = interactionActions.slice(2);
-
-function ActionBubble({
+function ActionIcon({
   action,
   index,
   completed,
@@ -36,168 +30,157 @@ function ActionBubble({
   onPress: () => void;
 }) {
   const {theme} = useAppTheme();
-  // 아직 안 한 버튼은 둥실둥실 떠 있어서 눌러 달라는 느낌을 준다. 버튼마다 박자를 엇갈린다.
-  const floatAnim = useRef(new Animated.Value(0)).current;
+  // 아직 안 한 아이콘은 통통 튀어서 눌러 달라는 느낌을 준다. 아이콘마다 박자를 엇갈린다.
+  const bounceAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     if (completed) {
-      floatAnim.setValue(0);
+      bounceAnim.setValue(0);
       return;
     }
 
-    const floating = Animated.loop(
+    const bouncing = Animated.loop(
       Animated.sequence([
-        Animated.delay(index * 220),
-        Animated.timing(floatAnim, {
-          duration: FLOAT_DURATION,
+        Animated.delay(index * 200),
+        Animated.timing(bounceAnim, {
+          duration: BOUNCE_DURATION,
           toValue: 1,
           useNativeDriver: true,
         }),
-        Animated.timing(floatAnim, {
-          duration: FLOAT_DURATION,
+        Animated.timing(bounceAnim, {
+          duration: BOUNCE_DURATION,
           toValue: 0,
           useNativeDriver: true,
         }),
       ]),
     );
-    floating.start();
-    return () => floating.stop();
-  }, [completed, floatAnim, index]);
+    bouncing.start();
+    return () => bouncing.stop();
+  }, [bounceAnim, completed, index]);
 
   return (
-    <Animated.View
-      style={[
-        styles.item,
-        {
-          transform: [
-            {
-              translateY: floatAnim.interpolate({
-                inputRange: [0, 1],
-                outputRange: [0, -4],
-              }),
-            },
-          ],
-        },
-      ]}>
-      <Pressable
-        accessibilityLabel={action.label}
-        disabled={completed}
-        onPress={onPress}
-        style={({pressed}) => [
-          styles.bubble,
-          {backgroundColor: completed ? theme.surfaceMuted : theme.surface},
-          selected && {borderColor: theme.accent},
-          completed && styles.completedBubble,
-          pressed && styles.pressed,
+    <Pressable
+      accessibilityLabel={action.label}
+      disabled={completed}
+      onPress={onPress}
+      style={({pressed}) => [styles.item, pressed && styles.pressed]}>
+      <Animated.View
+        style={[
+          styles.iconWrap,
+          selected && {backgroundColor: theme.surface},
+          {
+            transform: [
+              {
+                translateY: bounceAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0, -3],
+                }),
+              },
+            ],
+          },
         ]}>
         <Text style={[styles.emoji, completed && styles.completedEmoji]}>
           {action.emoji}
         </Text>
-        {completed && (
-          <View style={[styles.doneBadge, {backgroundColor: theme.accent}]}>
-            <Check color={theme.accentText} size={10} strokeWidth={3.5} />
+        {completed ? (
+          <View style={[styles.badge, {backgroundColor: theme.stressNormal}]}>
+            <Check color="#FFFFFF" size={10} strokeWidth={3.5} />
+          </View>
+        ) : (
+          // 오늘 아직 안 한 행동 표시
+          <View style={[styles.badge, {backgroundColor: theme.accent}]}>
+            <Text style={styles.badgeMark}>!</Text>
           </View>
         )}
-      </Pressable>
+      </Animated.View>
       <Text
+        numberOfLines={1}
         style={[
           styles.label,
           {color: completed ? theme.textMuted : theme.text},
+          selected && {color: theme.accent},
         ]}>
         {completed ? completedMessages[action.key] : action.label}
       </Text>
-    </Animated.View>
+    </Pressable>
   );
 }
 
-// 캐릭터 방 가장자리에 붙는 작은 행동 버튼(먹이·놀이 / 음악·휴식)
-export default function SideActions({
+// 캐릭터 방 위쪽에 가로로 놓는 행동 아이콘(먹이·놀이·음악·휴식)
+export default function ActionBar({
   completedPreferences,
   selectedAction,
   onActionSelect,
   onCancel,
-}: SideActionsProps) {
-  const renderColumn = (
-    actions: typeof interactionActions,
-    offset: number,
-  ) =>
-    actions.map((action, index) => (
-      <ActionBubble
-        key={action.key}
-        action={action}
-        index={offset + index}
-        completed={Boolean(completedPreferences[action.key])}
-        selected={selectedAction === action.key}
-        // 고르고 있는 버튼을 한 번 더 누르면 선택지를 닫는다.
-        onPress={() =>
-          selectedAction === action.key ? onCancel() : onActionSelect(action.key)
-        }
-      />
-    ));
-
+}: ActionBarProps) {
   return (
-    <View pointerEvents="box-none" style={StyleSheet.absoluteFill}>
-      <View pointerEvents="box-none" style={[styles.column, styles.left]}>
-        {renderColumn(LEFT, 0)}
-      </View>
-      <View pointerEvents="box-none" style={[styles.column, styles.right]}>
-        {renderColumn(RIGHT, LEFT.length)}
-      </View>
+    <View style={styles.bar}>
+      {interactionActions.map((action, index) => (
+        <ActionIcon
+          key={action.key}
+          action={action}
+          index={index}
+          completed={Boolean(completedPreferences[action.key])}
+          selected={selectedAction === action.key}
+          // 고르고 있는 아이콘을 한 번 더 누르면 선택지를 닫는다.
+          onPress={() =>
+            selectedAction === action.key
+              ? onCancel()
+              : onActionSelect(action.key)
+          }
+        />
+      ))}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  column: {
-    bottom: 22,
-    position: 'absolute',
-    rowGap: 12,
-  },
-  left: {
-    left: 14,
-  },
-  right: {
-    right: 14,
+  bar: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingHorizontal: 8,
   },
   item: {
     alignItems: 'center',
-    rowGap: 3,
-  },
-  bubble: {
-    ...shadows.raised,
-    alignItems: 'center',
-    borderColor: 'transparent',
-    borderRadius: BUTTON_SIZE / 2,
-    borderWidth: 2.5,
-    height: BUTTON_SIZE,
-    justifyContent: 'center',
-    width: BUTTON_SIZE,
-  },
-  completedBubble: {
-    elevation: 0,
-    shadowOpacity: 0,
+    rowGap: 4,
+    width: 72,
   },
   pressed: {
     transform: [{scale: 0.9}],
   },
+  iconWrap: {
+    alignItems: 'center',
+    borderRadius: 20,
+    height: 54,
+    justifyContent: 'center',
+    width: 54,
+  },
   emoji: {
-    fontSize: 25,
+    fontSize: 38,
   },
   completedEmoji: {
     opacity: 0.4,
   },
-  doneBadge: {
+  badge: {
     alignItems: 'center',
-    borderRadius: 9,
-    height: 18,
+    borderColor: '#FFFFFF',
+    borderRadius: 10,
+    borderWidth: 2,
+    height: 20,
     justifyContent: 'center',
     position: 'absolute',
-    right: -3,
-    top: -3,
-    width: 18,
+    right: 0,
+    top: 0,
+    width: 20,
+  },
+  badgeMark: {
+    color: '#FFFFFF',
+    fontSize: 11,
+    fontWeight: '800',
+    lineHeight: 13,
   },
   label: {
-    fontSize: 11,
-    fontWeight: '600',
+    fontSize: 13,
+    fontWeight: '700',
   },
 });
