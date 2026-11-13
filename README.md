@@ -14,21 +14,34 @@
   <img src="https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white" />
   <img src="https://img.shields.io/badge/Kotlin-7F52FF?logo=kotlin&logoColor=white" />
   <img src="https://img.shields.io/badge/Health_Connect-4285F4?logo=android&logoColor=white" />
+  <img src="https://img.shields.io/badge/Node.js-339933?logo=nodedotjs&logoColor=white" />
   <img src="https://img.shields.io/badge/Supabase-3FCF8E?logo=supabase&logoColor=white" />
   <img src="https://img.shields.io/badge/pgvector-336791?logo=postgresql&logoColor=white" />
 </p>
 
 <p align="center">
-  2026.03 ~ 2026.06 · 4인 팀 프로젝트 · 이 레포는 <b>모바일 앱(React Native)</b> 파트입니다
+  4인 팀 프로젝트 · 앱(React Native) · 백엔드(Node.js) · AI 서버(Cloudflare Worker)를 한 레포에서 관리해요
 </p>
 
 <!-- 📸 스크린샷: docs/ 폴더에 이미지를 넣고 경로를 바꿔 주세요
-| 로그인 | 홈 | 실시간 리포트 | 주간 리포트 | 다크모드 |
+| 홈 | 채팅 | 실시간 리포트 | 주간 리포트 | 내 설정 |
 |---|---|---|---|---|
-| <img src="docs/login.jpg" width="160"/> | <img src="docs/home.jpg" width="160"/> | <img src="docs/report-daily.jpg" width="160"/> | <img src="docs/report-weekly.jpg" width="160"/> | <img src="docs/dark.jpg" width="160"/> |
+| <img src="docs/home.jpg" width="160"/> | <img src="docs/chat.jpg" width="160"/> | <img src="docs/report-daily.jpg" width="160"/> | <img src="docs/report-weekly.jpg" width="160"/> | <img src="docs/mypage.jpg" width="160"/> |
 -->
 
 ---
+
+## 📑 목차
+
+- [기획 배경](#-기획-배경)
+- [주요 기능](#-주요-기능)
+- [시스템 구성](#️-시스템-구성)
+- [실행 방법](#-실행-방법)
+- [Health Connect 연동](#-삼성헬스--health-connect-연동)
+- [혈압계 연동](#-혈압계-연동)
+- [폴더 구조](#-폴더-구조)
+- [팀 구성](#-팀-구성)
+- [앞으로 해볼 것](#-앞으로-해볼-것)
 
 ## 💡 기획 배경
 
@@ -40,229 +53,124 @@ NowNow는 **항상 차고 있는 스마트워치**로 스트레스를 꾸준히 
 
 ## ✨ 주요 기능
 
-| 기능 | 설명 |
-|---|---|
-| ⌚ **건강 데이터 수집** | 갤럭시워치 → Health Connect로 심박수, 걸음 수, 수면, 혈압, 혈중산소 수집 |
-| 📈 **스트레스 지수** | 심박수와 pseudo-HRV로 시간대별 스트레스를 계산하고, 수면·걸음 수·혈압·혈중산소를 반영해 **100점 만점 일일 스트레스 지수** 산출 |
-| 💬 **AI 챗봇** | 건강 데이터, 과거 대화 요약(임베딩 의미 검색), 사용자 취향·페르소나를 합쳐 답하는 맞춤형 챗봇, 위험 수치 감지 시 안내하는 안전 가드레일 |
-| 📊 **리포트** | 실시간 리포트(오늘의 건강 데이터)와 주간 리포트(7일 건강·대화 데이터 기반 스트레스 변화) |
-| 🐣 **캐릭터 상호작용** | 뿡뿡이에게 먹이 주기·놀아 주기·음악·취미 선택, 선택 결과는 선호도로 저장해 챗봇 응답에 활용 |
-| 🔐 **인증·설정** | Supabase 이메일 회원가입·로그인, 세션 유지, 라이트/다크 모드 |
+### 🏠 홈 — 뿡뿡이 돌보기
+- 캐릭터 방 위쪽의 **밥주기 · 놀이 · 음악 · 휴식** 아이콘을 누르면, 아이콘 바로 아래에 오늘의 선택지 3개가 떠요. 선택지는 날마다 바뀌어요.
+- 고르면 뿡뿡이가 기뻐하고, 고른 결과는 **취향으로 저장**돼 챗봇 답변에 쓰여요. 오늘 아직 안 한 행동에는 `!` 표시가 떠요.
+- **음악**은 오늘의 장르마다 대표곡을 **앨범 자켓**으로 보여 줘요. 누르면 그 곡이 바로 재생 대기 상태로 열리고, 유튜브 뮤직으로도 열 수 있어요.
+- **밥주기**를 고르면 배달앱(배민·쿠팡이츠)으로 바로 갈 수 있어요.
+
+### 💬 채팅 — 나를 기억하는 뿡뿡이
+- 건강 기록, 과거 대화 요약(임베딩 의미 검색), 취향·별명을 합쳐 다정한 반말로 답해요.
+- 대화에 맞춰 **할 일을 버튼으로 제안**해요. 명상·스트레칭 영상, 음식·배달앱, 음악, 영화(CGV·메가박스) 등이에요.
+- **오늘의 건강기록♡** 버튼으로 내 건강 데이터를 바탕으로 상담받을 수 있어요.
+- 하루를 정리하면 스트레스 원인 **키워드**를 자동으로 분류해요. 키워드는 직접 추가할 수도 있어요.
+- 위험한 수치나 표현을 감지하면 전문 도움을 안내하는 **안전 가드레일**이 있어요. ([`shared/careSafety.js`](shared/careSafety.js))
+
+### 📊 리포트
+- **실시간 리포트**: 오늘의 걸음 수, 심박수, 수면, 혈압, 혈중산소와 시간대별 스트레스(최고·최저 시간과 점수)
+- **주간 리포트**: 7일간 건강·대화 데이터로 본 스트레스 변화와 원인 키워드 집계
+- 최근 기록과 원인 키워드를 바탕으로 **AI 추천**을 보여 줘요. 서버에 연결할 수 없으면 기본 추천을 보여 줘요.
+- 혈압은 직접 입력하거나, 오므론 혈압계 기록을 가져올 수 있어요. ([혈압계 연동](#-혈압계-연동))
+
+### 📈 스트레스 지수
+- 심박수와 pseudo-HRV로 시간대별 스트레스를 계산하고, 수면·걸음 수·혈압·혈중산소를 반영해 **100점 만점 일일 스트레스 지수**를 내요.
+- 서버가 **매일 새벽 3시(KST)** 전날 점수를 계산해 저장해요. 서버가 꺼져 있던 날은 켜질 때 채워 넣어요. ([`dailyStressScheduler.js`](backend/jobs/dailyStressScheduler.js))
+- 내 설정에서 **스트레스 감지 기준**을 나에게 맞게 바꿀 수 있어요.
+
+### ⚙️ 내 설정
+- 계정(별명·성별·나이), MBTI와 활동·음식·음악 취향
+- 알림: 하루 마무리 · 날씨 · 놀자(평일/주말/매일) · 안부 알림. 폰에서 직접 예약해요.
+- 라이트/다크 모드, 건강 데이터 권한·앱 권한 관리, 혈압계 연결
 
 ## 🏗️ 시스템 구성
 
 ```
- Galaxy Watch
-     │
-     ▼
- Health Connect ──▶ HealthConnectModule.kt (Kotlin, RN Bridge)
-                              │
-                ┌─────────────▼──────────────┐
-                │   React Native App (이 레포) │
-                └─────────────┬──────────────┘
-                              │ Supabase 로그인 토큰
-                              ▼
-                   Node.js / Express 백엔드
-            (인증 확인 · 건강 · 채팅 · 리포트 · 음악 API)
-              │                 │                 │
-              │ AI_RELAY        │ 임베딩           │
-              ▼                 ▼                 ▼
-     AI 서버 (Cloudflare     OpenAI Embeddings    Supabase PostgreSQL
-     Worker) ──▶ OpenAI     (text-embedding-     + pgvector
-     (챗봇 답변·리포트 추천)   3-small, 1536차원)    (사용자 · 건강 raw · 채팅
-                                                  요약 · 리포트 · 임베딩)
+ Galaxy Watch      오므론 혈압계
+     │                 │
+     ▼                 ▼
+ Samsung Health    OMRON connect
+     └──────┬──────────┘
+            ▼
+     Health Connect ──▶ HealthConnectModule.kt (Kotlin, RN Bridge)
+                                   │
+                     ┌─────────────▼──────────────┐
+                     │     React Native 앱 (src/)   │
+                     └─────────────┬──────────────┘
+                                   │ Supabase 로그인 토큰
+                                   ▼
+                     Node.js / Express 백엔드 (backend/)
+          (인증 · 건강 · 채팅 · 리포트 · 스트레스 · 캐릭터 · 음악 API)
+              │                   │                    │
+              │ AI_RELAY          │ 임베딩              │
+              ▼                   ▼                    ▼
+   AI 서버 (chatbot-server/)   OpenAI Embeddings     Supabase PostgreSQL
+   Cloudflare Worker ──▶       (text-embedding-      + pgvector
+   OpenAI gpt-4o-mini          3-small, 1536차원)    (사용자 · 건강 기록 · 채팅
+   (챗봇 답변 · 리포트 추천)                           요약 · 리포트 · 임베딩)
 ```
 
-- 앱은 LLM이나 DB를 직접 부르지 않아요. 모든 요청은 로그인 토큰과 함께 **Node.js 백엔드**로 가요.
-- **챗봇 답변·리포트 AI 추천**: 백엔드가 건강 기록·대화 기억·취향을 모아 AI 서버(Cloudflare Worker)의 `/chat`으로 중계하고, Worker가 OpenAI(`gpt-4o-mini`)를 호출해요. ([`chatRelayService.js`](backend/services/chatRelayService.js), Worker 코드: [`chatbot-server/worker.mjs`](chatbot-server/worker.mjs))
-- **대화 기억 검색**: 백엔드가 OpenAI Embeddings API로 최근 30일 채팅 요약을 벡터로 만들어 `memory_embeddings`에 저장하고, pgvector 코사인 거리로 질문과 가까운 요약 3개를 찾아 챗봇 맥락에 넣어요. ([`chatMemorySearch.js`](backend/services/chatMemorySearch.js)) `OPENAI_API_KEY`가 없으면 이 단계는 건너뛰어요.
-- AI 서버 주소·토큰과 OpenAI 키는 백엔드 `.env`에만 두고 앱에는 넣지 않아요.
-- 음악 추천은 백엔드가 YouTube Data API v3로 검색해요.
+- 앱은 LLM이나 DB를 직접 부르지 않아요. 모든 요청은 로그인 토큰과 함께 **백엔드**로 가고, 서버가 토큰으로 사용자를 확인해요.
+- **챗봇 답변 · 리포트 AI 추천**: 백엔드가 건강 기록 · 대화 기억 · 취향을 모아 AI 서버의 `/chat`으로 중계하고, AI 서버가 OpenAI를 호출해요. ([`chatRelayService.js`](backend/services/chatRelayService.js), [`chatbot-server/worker.mjs`](chatbot-server/worker.mjs))
+- **대화 기억 검색**: 최근 30일 채팅 요약을 벡터로 만들어 `memory_embeddings`에 저장하고, 질문과 가까운 요약 3개를 찾아 챗봇에 넘겨요. ([`chatMemorySearch.js`](backend/services/chatMemorySearch.js)) `OPENAI_API_KEY`가 없으면 이 단계는 건너뛰어요.
+- **음악 추천**: 백엔드가 YouTube Data API v3로 장르별 곡을 찾아요.
+- AI 서버 주소 · 토큰, OpenAI · YouTube 키는 백엔드 `.env`에만 두고 앱에는 넣지 않아요.
 
-## ⌚ 삼성헬스 · Health Connect 연동
+### 백엔드 API
 
-### 왜 Health Connect인가
-- 처음에는 **삼성헬스 SDK**로 갤럭시워치 데이터를 바로 읽으려고 했어요. 그런데 삼성헬스 SDK는 **파트너 승인**을 받아야 데이터를 읽을 수 있고, 프로젝트 기간 안에 승인이 나지 않았어요.
-- 그래서 구글과 삼성이 함께 만든 Android 건강 데이터 플랫폼인 **Health Connect**를 쓰기로 했어요. 삼성헬스가 Health Connect로 데이터를 동기화해 주기 때문에, 앱은 **Health Connect만 읽으면** 갤럭시워치 데이터를 받을 수 있어요.
-- 덕분에 앱이 특정 기기에 묶이지 않아요. Health Connect에 데이터를 쓰는 다른 앱이나 기기(Fitbit, Google Fit 등)의 데이터도 같은 코드로 읽혀요.
-
-### 데이터 흐름
-
-```
- Galaxy Watch ──(블루투스)──▶ Samsung Health 앱 ──(동기화)──▶ Health Connect
-                                                                │
-                                         HealthConnectModule.getHealthData()
-                                          (Kotlin · Coroutine IO · Promise)
-                                                                │
-                                                                ▼
-                                    ReportPage.tsx ── 실시간 리포트 카드·차트 표시
-                                                                │
-                                                                ▼
-                                              Supabase raw 테이블 upsert
-```
-
-1. 갤럭시워치가 심박수, 혈중산소, 혈압, 수면, 걸음 수를 측정해서 **삼성헬스 앱**에 보내요.
-2. 삼성헬스가 허용된 데이터 종류를 **Health Connect**에 동기화해요.
-3. 리포트 화면이 열리면 JS에서 `NativeModules.HealthConnectModule.getHealthData()`를 호출해요.
-4. Kotlin 모듈이 Health Connect에서 데이터를 읽어서 JS 객체(`WritableMap`)로 돌려줘요.
-5. 앱은 화면에 표시하고, 심박수·혈압·산소포화도 샘플은 Supabase raw 테이블에 저장해요.
-
-### 읽는 데이터
-
-| 데이터 | Health Connect 레코드 | 권한 | 조회 범위 | JS로 넘기는 값 |
-|---|---|---|---|---|
-| 걸음 수 | `StepsRecord` (`COUNT_TOTAL` 집계) | `READ_STEPS` | 오늘 0시 ~ 지금 | `stepsTotal` |
-| 심박수 | `HeartRateRecord` | `READ_HEART_RATE` | 오늘 0시 ~ 지금 | `latestHeartRate`, `latestHeartRateTime`, `heartRateSamples[{time, bpm}]` |
-| 산소포화도 | `OxygenSaturationRecord` | `READ_OXYGEN_SATURATION` | 오늘 0시 ~ 지금 | `latestOxygen`, `latestOxygenTime`, `oxygenSamples[{time, percentage}]` |
-| 혈압 | `BloodPressureRecord` | `READ_BLOOD_PRESSURE` | 오늘 0시 ~ 지금 | `latestSystolic`, `latestDiastolic`, `latestBloodPressureTime`, `bloodPressureSamples[{time, systolic, diastolic}]` |
-| 수면 | `SleepSessionRecord` | `READ_SLEEP` | 최근 24시간 | `latestSleepMinutes`, `latestSleepStartTime`, `latestSleepEndTime`, `sleepSessions[{startTime, endTime, hours}]` |
-
-- 시간 값은 모두 ISO-8601 문자열(`Instant.toString()`)이에요.
-- 심박수는 레코드 하나에 샘플이 여러 개 들어 있어서, 모든 샘플을 펼친 뒤 가장 늦은 시각의 값을 `latest`로 골라요.
-- 수면은 자정을 넘기기 때문에 "오늘"이 아니라 **최근 24시간** 기준으로 읽고, 가장 늦게 끝난 세션을 `latest`로 써요.
-- 데이터가 없으면 `latest*` 값은 `0`, 시각은 `null`, 목록은 빈 배열이에요.
-
-### 저장 (앱 → 백엔드 → Supabase) — 증분 동기화
-
-앱은 [`healthSync.ts`](src/services/health/healthSync.ts)로 Health Connect 기록을 백엔드 `POST /api/health/records`에 보내고, 서버가 Supabase에 저장해요. 앱은 DB에 직접 쓰지 않아요.
-
-- **언제**: 앱을 켜거나 다시 볼 때(5분 간격), 리포트 화면의 새로고침 버튼
-- **무엇을**: `HealthConnectModule.syncHealthData(token, since)`가 **Changes API**로 마지막 동기화 뒤에 추가·수정·삭제된 레코드만 읽어요.
-  - 첫 동기화는 최근 30일을 읽어요. 토큰이 만료되면(30일 넘게 동기화 안 함) 마지막 동기화 하루 전부터 다시 읽어요.
-- **실패해도 안 빠짐**: 서버 저장이 모두 성공했을 때만 토큰을 저장해요. 실패하면 다음 동기화가 같은 변경분부터 다시 보내요. 며칠 만에 앱을 켜도 그 사이 기록이 다 들어가요.
-- **수정·삭제 반영**: 행마다 Health Connect 레코드 id(`source_record_id`)와 기록한 앱(`data_origin`)을 저장해요. 같은 레코드가 다시 오면 예전 행을 바꾸고, 지워진 레코드는 서버에서도 지워요.
-- **걸음 수**: 폰과 워치의 원본 레코드가 겹치므로 Health Connect 집계(중복 제거)를 **시간별**로 보내고, 그 구간 행을 통째로 바꿔요.
-- 잘못 잰 값 하나 때문에 동기화가 멈추지 않도록 동기화 요청은 이상한 행만 건너뛰어요(`skip_invalid`).
-
-| 요청 키 | 테이블 | 컬럼 | 중복 기준 |
-|---|---|---|---|
-| `heart_rate` | `heart_rate_records` | `user_id`, `measured_at`, `bpm`, `source_record_id`, `data_origin` | `user_id, measured_at` |
-| `blood_pressure` | `blood_pressure_records` | `user_id`, `measured_at`, `systolic`, `diastolic`, (출처) | `user_id, measured_at` |
-| `oxygen` | `oxygen_records` | `user_id`, `measured_at`, `percentage`, (출처) | `user_id, measured_at` |
-| `steps` + `steps_replace` | `steps_records` | `user_id`, `start_time`, `end_time`, `count` (시간별) | 구간 교체 |
-| `sleep` | `sleep_records` | `user_id`, `start_time`, `end_time`, (출처) | `user_id, start_time, end_time` |
-| `deleted` | 위 테이블 중 출처 컬럼이 있는 4개 | `source_record_id` | — |
-
-- 혈압은 워치 연동을 검증할 때까지 **직접 입력한 값만** 저장해요.
-- `user_id`는 보내지 않아요. 서버가 로그인 토큰으로 사용자를 정해요. 로그인하지 않았으면 서버가 401로 거절해요.
-- DB 변경: [`20261111_health_sync_source.sql`](backend/db/migrations/20261111_health_sync_source.sql)
-
-### 네이티브 모듈 구성
-
-| 파일 | 역할 |
+| 경로 | 하는 일 |
 |---|---|
-| [`HealthConnectModule.kt`](android/app/src/main/java/com/mibandtest/HealthConnectModule.kt) | `getHealthData()` `@ReactMethod`. `Dispatchers.IO` 코루틴에서 읽고 `Promise`로 결과를 돌려줘요. 실패하면 `HEALTH_ERROR`로 reject 해요. |
-| [`HealthConnectPackage.kt`](android/app/src/main/java/com/mibandtest/HealthConnectPackage.kt) | 모듈을 `ReactPackage`로 묶어요. |
-| [`MainApplication.kt`](android/app/src/main/java/com/mibandtest/MainApplication.kt) | `add(HealthConnectPackage())`로 패키지를 등록해요. |
-| [`AndroidManifest.xml`](android/app/src/main/AndroidManifest.xml) | 5가지 `android.permission.health.READ_*` 권한을 선언하고, Health Connect 권한 화면에서 앱이 보이도록 `VIEW_PERMISSION_USAGE` activity-alias를 등록해요. |
-| [`android/app/build.gradle`](android/app/build.gradle) | `androidx.health.connect:connect-client:1.1.0` 의존성 (minSdk 26, compileSdk 36) |
-| [`ReportPage.tsx`](src/screens/Report/ReportPage.tsx) | 모듈을 호출해 카드·차트에 표시하고 Supabase에 저장해요. |
-| [`mockHealthData.ts`](src/services/health/mockHealthData.ts) | Health Connect를 쓸 수 없는 개발 환경용 목업 데이터 |
+| `/api/auth` | 회원가입 · 로그인 |
+| `/api/me` | 내 프로필 · 취향 · 설정 |
+| `/api/health` | 건강 기록 저장(증분 동기화) · 조회 |
+| `/api/chat` | 대화 저장 · AI 답변 중계 · 하루 요약 |
+| `/api/reports` | 실시간 · 주간 리포트, AI 추천 |
+| `/api/stress` | 스트레스 점수 |
+| `/api/moods` | 기분 기록 |
+| `/api/character` | 홈 캐릭터 행동(밥주기 · 놀이 · 음악 · 휴식) 저장 |
+| `/api/music` | 장르별 추천곡 |
 
-### 에뮬레이터·개발 환경 목업
-- 모듈이 없거나(iOS 등) Health Connect 읽기에 실패하면(에뮬레이터, 권한 없음 등) **개발 빌드(`__DEV__`)에서만** 목업 데이터로 화면을 채워요.
-- 목업은 0시부터 현재 시각까지 시간별 심박수, 3시간마다 혈압, 2시간마다 산소포화도, 6시간 52분 수면, 6,342걸음을 만들어요.
-- 목업 데이터는 **Supabase에 저장하지 않아요.** 릴리스 빌드에서는 목업을 쓰지 않아요.
-
-### 실기기 연동 설정 (갤럭시워치 기준)
-
-1. **Health Connect 확인**: Android 14 이상은 시스템에 내장돼 있어요(설정 → 보안 및 개인정보 보호 → 개인정보 보호 → Health Connect). Android 13 이하는 Play 스토어에서 Health Connect 앱을 설치해요.
-2. **갤럭시워치 ↔ 삼성헬스 연결**: Galaxy Wearable 앱으로 워치를 페어링하고, 삼성헬스에 워치 데이터가 들어오는지 확인해요.
-3. **삼성헬스 → Health Connect 동기화 켜기**: 삼성헬스 → 설정 → Health Connect에서 걸음 수, 심박수, 혈중 산소, 혈압, 수면 쓰기를 허용해요.
-4. **NowNow 읽기 권한 허용**: Health Connect → 앱 권한 → NowNow에서 5가지 데이터 읽기를 모두 허용해요.
-5. **측정 데이터 준비**
-   - 심박수·걸음 수·수면: 워치를 차고 있으면 자동으로 기록돼요(수면은 워치를 차고 자야 해요).
-   - 혈중산소: 워치에서 직접 측정하거나 삼성헬스에서 자동 측정을 켜요.
-   - 혈압: 갤럭시워치 혈압 측정은 **Samsung Health Monitor 앱**에서 커프 혈압계로 보정한 뒤에 쓸 수 있어요.
-6. 앱의 **리포트 → 실시간 리포트** 탭을 열면 데이터가 표시돼요. Logcat에서 `HEALTH_DATA` / `HEALTH_ERROR` 태그로 읽은 값과 오류를 확인할 수 있어요.
-
-### 주의할 점·한계
-- 동기화는 앱이 켜져 있을 때만 돌아요. 앱을 안 켜도 기록이 빠지지는 않지만, 서버에 늦게 들어가요. 백그라운드 동기화는 [설계 문서](docs/background-sync-design.md)만 있어요.
-- Health Connect 설치·지원 여부(`getSdkStatus`)를 따로 확인하지 않아요. 설치되지 않은 기기에서는 읽기가 실패해요.
-- 삼성헬스 → Health Connect 동기화는 실시간이 아니에요. 워치에서 방금 측정한 값이 늦게 보일 수 있어요.
-- 갤럭시워치의 **ECG 원시 데이터와 HRV(RR 간격)는 Health Connect로 넘어오지 않아요.** 그래서 스트레스 지수는 심박수 표준편차 기반 pseudo-HRV로 계산해요.
-- Health Connect는 Android 전용이에요. iOS에서는 건강 데이터가 표시되지 않아요(HealthKit 미연동).
-
-## 👥 팀 구성
-
-| 파트 | 담당 |
-|---|---|
-| 백엔드 | Node.js/Express 서버, 인증·채팅·리포트 API |
-| AI | AI 서버(Cloudflare Worker → OpenAI), 프롬프트 엔지니어링 |
-| DB 설계·UI | ERD 설계, 전체 화면 UI/UX와 초기 프론트엔드 ([@h2st0ry](https://github.com/h2st0ry)) |
-| **건강 데이터·DB 구현·프론트 마무리** | **본인** (아래 참고) |
-
-## 🙋 담당 역할
-
-### 1. Health Connect 건강 데이터 모듈 (Kotlin)
-- 원래 삼성헬스 SDK를 쓰려고 개발 권한을 신청했지만 프로젝트 기간 안에 승인이 나지 않았어요. 그래서 구글·삼성이 함께 만든 **Health Connect로 방향을 바꿨어요.**
-- **Kotlin으로 네이티브 모듈을 직접 개발**해서 걸음 수(오늘 합계), 심박수, 산소포화도, 혈압, 수면 세션(최근 24시간)을 읽어요. 최신값과 시간별 샘플 목록으로 정리해서 넘겨요.
-- 처음에는 앱과 따로 도는 구조여서 통합이 어려웠어요. **React Native Bridge(`NativeModules`)로 연결**해서 앱 안에서 바로 쓸 수 있게 했어요.
-- 메인 스레드가 멈추지 않도록 Coroutine(`Dispatchers.IO`)에서 비동기로 읽고 Promise로 반환해요.
-- 수집한 데이터는 Supabase raw 테이블에 저장되는 것까지 확인했어요.
-- **갤럭시워치를 실제로 착용하고** 데이터가 쌓이는지 테스트했어요.
-- 관련 파일: [`HealthConnectModule.kt`](android/app/src/main/java/com/mibandtest/HealthConnectModule.kt)
-
-### 2. 스트레스 지수 로직 설계
-- 심박변이도(HRV)와 스트레스에 관한 논문을 찾아보고 데이터별 점수 기준을 정했어요.
-- 갤럭시워치의 ECG 원시 데이터는 플랫폼 정책 때문에 접근할 수 없었어요. 대신 **심박수 표준편차로 pseudo-HRV를 계산**했어요.
-- 시간대별 스트레스 → 일일 스트레스 → 혈압·걸음 수 반영 → 수면 반영 순서로 **100점 만점 `FinalDailyStressScore` 공식**을 작성했어요.
-
-### 3. 데이터베이스 구현 (Supabase)
-- 설계된 ERD를 검토한 뒤 Supabase 환경에 맞게 반영했어요.
-- 사용자, 건강 데이터, 채팅, 리포트 테이블과 테이블 간 관계를 구현했어요.
-- 사용하는 LLM 임베딩 차원에 맞춰 **pgvector 컬럼**을 설계했어요.
-- 건강 데이터 전용 **raw 테이블**을 설계하고 구현했어요.
-
-### 4. 프론트엔드 마무리
-- 로그인·회원가입 UI와 기능(Supabase Auth, 이메일 인증)을 구현했어요. `AsyncStorage`로 세션을 저장해서 앱을 다시 켜도 로그인이 유지돼요.
-- 리포트 페이지를 **실시간 리포트와 주간 리포트**로 다시 구성했어요.
-- 실시간 리포트에 오늘의 걸음 수, 심박수, 수면, 혈압이 실제 데이터로 표시되게 했어요.
-- 챗봇 채팅을 앱에 연결했어요. (현재는 백엔드를 거쳐 AI 서버로 중계)
-- iOS 위주로 세팅돼 있던 프로젝트의 Android 빌드 오류를 해결했어요.
-
-### 5. 시스템 아키텍처
-- React Native, Node.js, Supabase, OpenAI 사이의 데이터 흐름을 설계했어요.
-- 시스템 구성도 초안과 최종본을 작성했어요.
-
-## 🧯 트러블슈팅
-
-| 문제 | 해결 |
-|---|---|
-| 삼성헬스 SDK 개발 권한을 기간 내에 받지 못함 | Health Connect로 전환해 Kotlin 모듈을 직접 개발 |
-| Kotlin 모듈이 앱과 따로 동작해서 통합하기 어려움 | React Native Bridge로 네이티브 모듈을 등록해 JS에서 호출 |
-| 정밀한 HRV에 필요한 ECG 원시 데이터에 접근할 수 없음 | 심박수 표준편차 기반 pseudo-HRV로 대체 |
-| iOS 기준 프로젝트라 Android 빌드 실패 | 빌드 설정을 정리해 Android 실기기에서 실행 |
-
-## 🛠️ 기술 스택
-
-| 분야 | 사용 기술 |
-|---|---|
-| 앱 | React Native 0.85, React 19, TypeScript, React Navigation |
-| 네이티브 | Kotlin, Health Connect 1.1.0, Kotlin Coroutines |
-| DB·인증 | Supabase PostgreSQL, pgvector, Supabase Auth |
-| 백엔드 (팀) | Node.js 22, Express 5 |
-| AI (팀) | Cloudflare Workers, OpenAI API `gpt-4o-mini` (챗봇), OpenAI Embeddings `text-embedding-3-small` + pgvector (대화 기억 검색) |
-| 외부 API | YouTube Data API v3 (음악 추천) |
-| UI | react-native-svg (차트), lucide-react-native, react-native-gesture-handler |
+자세한 요청 · 응답은 [`docs/backend-api-requirements.md`](docs/backend-api-requirements.md)에 있어요.
 
 ## 🚀 실행 방법
 
+### 1. 백엔드
+
 ```sh
+cd backend
+cp .env.example .env   # 값 채우기 (아래 표)
 npm install
-npm start
-
-# Android (Health Connect가 설치되고 스마트워치와 연동된 기기 필요)
-npm run android
-
-# iOS
-cd ios && bundle exec pod install && cd ..
-npm run ios
+npm start              # http://localhost:5000
+npm test               # 자동 테스트
 ```
 
-> 건강 데이터는 **Android + Health Connect** 환경에서만 실제 값이 표시돼요. 기기 설정은 [실기기 연동 설정](#실기기-연동-설정-갤럭시워치-기준)을 참고하세요. 에뮬레이터 개발 빌드에서는 목업 데이터가 표시돼요.
+| `.env` 값 | 용도 |
+|---|---|
+| `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` | DB · 로그인 (service role 키는 절대 커밋 금지) |
+| `AI_RELAY_URL`, `AI_RELAY_TOKEN` | AI 서버 주소와 토큰 |
+| `OPENAI_API_KEY` | (선택) 대화 기억 의미 검색 |
+| `YOUTUBE_API_KEY` | 홈 음악 추천곡 |
 
-### AI 서버 (Cloudflare Worker)
+### 2. 앱 (Android)
+
+```sh
+npm install
+npm start              # Metro (개발 서버)
+npm run android        # 다른 터미널에서 빌드 · 설치
+```
+
+- **에뮬레이터**는 PC의 `localhost:5000`을 `10.0.2.2`로 자동 접속해요. Health Connect를 못 읽으면 개발 빌드에서는 **목업 건강 데이터**가 나와요.
+- **USB로 연결한 실기기**는 PC 서버에 닿도록 포트를 연결해 줘요.
+  ```sh
+  adb reverse tcp:8081 tcp:8081   # Metro
+  adb reverse tcp:5000 tcp:5000   # 백엔드
+  ```
+- Windows에서 `npm run android`가 `'gradlew.bat' is not recognized`로 실패하면, `android` 폴더에서 직접 빌드해요.
+  ```sh
+  cd android && gradlew.bat app:installDebug
+  ```
+- 실제 건강 데이터는 **Android + Health Connect** 기기에서만 나와요. 설정 방법은 [실기기 연동 설정](#실기기-연동-설정-갤럭시워치-기준)을 참고하세요.
+
+### 3. AI 서버 (Cloudflare Worker)
 
 ```sh
 cd chatbot-server
@@ -274,25 +182,179 @@ npx wrangler deploy
 
 배포한 주소를 백엔드 `.env`의 `AI_RELAY_URL`에 넣어요. 키와 토큰은 Cloudflare 비밀값으로만 두고 코드에는 넣지 않아요.
 
+## ⌚ 삼성헬스 · Health Connect 연동
+
+### 왜 Health Connect인가
+- 처음에는 **삼성헬스 SDK**로 갤럭시워치 데이터를 바로 읽으려고 했어요. 그런데 삼성헬스 SDK는 **파트너 승인**이 필요했고, 프로젝트 기간 안에 승인이 나지 않았어요.
+- 그래서 구글과 삼성이 함께 만든 Android 건강 데이터 플랫폼인 **Health Connect**를 쓰기로 했어요. 삼성헬스가 Health Connect로 데이터를 동기화해 주기 때문에, 앱은 **Health Connect만 읽으면** 돼요.
+- 덕분에 앱이 특정 기기에 묶이지 않아요. 오므론 혈압계, Fitbit 등 Health Connect에 데이터를 쓰는 다른 기기도 같은 코드로 읽혀요.
+
+### 데이터 흐름
+
+```
+ Galaxy Watch ──(블루투스)──▶ Samsung Health ──(동기화)──▶ Health Connect
+                                                              │
+                                  HealthConnectModule (Kotlin · Coroutine IO · Promise)
+                                       │                              │
+                           getHealthData() · 화면 표시     syncHealthData() · 증분 동기화
+                                       ▼                              ▼
+                              리포트 카드 · 차트          POST /api/health/records → Supabase
+```
+
+### 읽는 데이터
+
+| 데이터 | Health Connect 레코드 | 권한 | 화면 표시 범위 |
+|---|---|---|---|
+| 걸음 수 | `StepsRecord` (`COUNT_TOTAL` 집계) | `READ_STEPS` | 오늘 0시 ~ 지금 |
+| 심박수 | `HeartRateRecord` | `READ_HEART_RATE` | 오늘 0시 ~ 지금 |
+| 산소포화도 | `OxygenSaturationRecord` | `READ_OXYGEN_SATURATION` | 오늘 0시 ~ 지금 |
+| 혈압 | `BloodPressureRecord` | `READ_BLOOD_PRESSURE` | 오늘 0시 ~ 지금 |
+| 수면 | `SleepSessionRecord` | `READ_SLEEP` | 최근 24시간 |
+
+- 시간 값은 모두 ISO-8601 문자열이에요. 혈압에는 기록한 앱(`sourcePackage`)도 같이 넘겨요.
+- 심박수는 레코드 하나에 샘플이 여러 개라 모두 펼친 뒤 가장 늦은 값을 최신값으로 써요.
+- 수면은 자정을 넘기므로 **최근 24시간** 기준으로 읽어요.
+
+### 저장 — 증분 동기화
+
+앱은 [`healthSync.ts`](src/services/health/healthSync.ts)로 기록을 백엔드 `POST /api/health/records`에 보내요. 앱은 DB에 직접 쓰지 않아요.
+
+- **언제**: 앱을 켜거나 다시 볼 때(5분 간격), 리포트의 새로고침 버튼
+- **무엇을**: Health Connect **Changes API**로 마지막 동기화 뒤에 추가 · 수정 · 삭제된 기록만 읽어요. 첫 동기화는 최근 30일을 읽어요.
+- **실패해도 안 빠짐**: 서버 저장이 모두 성공했을 때만 동기화 위치를 저장해요. 실패하면 다음에 같은 변경분부터 다시 보내요.
+- **수정 · 삭제 반영**: Health Connect 레코드 id와 기록한 앱을 같이 저장해서, 바뀐 기록은 고치고 지워진 기록은 서버에서도 지워요.
+- **걸음 수**: 폰과 워치 기록이 겹치므로 Health Connect 집계(중복 제거)를 시간별로 보내요.
+- 잘못 잰 값 하나 때문에 동기화가 멈추지 않도록 이상한 행만 건너뛰어요.
+
+| 요청 키 | 테이블 | 중복 기준 |
+|---|---|---|
+| `heart_rate` | `heart_rate_records` | `user_id, measured_at` |
+| `blood_pressure` | `blood_pressure_records` | `user_id, measured_at` |
+| `oxygen` | `oxygen_records` | `user_id, measured_at` |
+| `steps` + `steps_replace` | `steps_records` (시간별) | 구간 교체 |
+| `sleep` | `sleep_records` | `user_id, start_time, end_time` |
+| `deleted` | 위 테이블 중 출처 컬럼이 있는 4개 | `source_record_id` |
+
+- 혈압은 자동 동기화에서 빼고, **직접 입력 · 블루투스 수신 값만 서버에 저장**해요. Health Connect 혈압은 리포트 화면에만 합쳐서 보여 줘요.
+- `user_id`는 앱이 보내지 않아요. 서버가 로그인 토큰으로 정해요.
+
+### 네이티브 모듈 구성
+
+| 파일 | 역할 |
+|---|---|
+| [`HealthConnectModule.kt`](android/app/src/main/java/com/mibandtest/HealthConnectModule.kt) | `getHealthData()` · `syncHealthData()`. IO 코루틴에서 읽고 Promise로 돌려줘요. |
+| [`HealthConnectPackage.kt`](android/app/src/main/java/com/mibandtest/HealthConnectPackage.kt) | 모듈을 `ReactPackage`로 묶어 등록해요. |
+| [`AndroidManifest.xml`](android/app/src/main/AndroidManifest.xml) | 건강 데이터 읽기 · 블루투스 · 알림 권한, Health Connect 권한 화면용 activity-alias |
+| [`mockHealthData.ts`](src/services/health/mockHealthData.ts) | 에뮬레이터 등 개발 환경용 목업 데이터 (서버에 저장하지 않음, 릴리스 빌드에선 안 씀) |
+
+### 실기기 연동 설정 (갤럭시워치 기준)
+
+1. **Health Connect 확인**: Android 14 이상은 시스템에 내장돼 있어요. Android 13 이하는 Play 스토어에서 설치해요.
+2. **워치 ↔ 삼성헬스 연결**: Galaxy Wearable 앱으로 페어링하고, 삼성헬스에 데이터가 들어오는지 확인해요.
+3. **삼성헬스 → Health Connect 쓰기 허용**: 삼성헬스 → 설정 → Health Connect에서 걸음 수 · 심박수 · 혈중 산소 · 혈압 · 수면을 허용해요.
+4. **NowNow 읽기 허용**: Health Connect → 앱 권한 → NowNow에서 5가지 읽기를 모두 허용해요.
+5. 앱의 **리포트**를 열면 데이터가 표시돼요. Logcat의 `HEALTH_DATA` / `HEALTH_ERROR` 태그로 값과 오류를 볼 수 있어요.
+
+> 갤럭시워치 혈압은 **Samsung Health Monitor 앱**에서 커프 혈압계로 보정한 뒤에 측정할 수 있어요.
+
+### 주의할 점 · 한계
+- 동기화는 앱이 켜져 있을 때만 돌아요. 기록이 빠지지는 않지만 서버에 늦게 들어가요. 백그라운드 동기화는 [설계 문서](docs/background-sync-design.md)만 있어요.
+- 삼성헬스 → Health Connect 동기화는 실시간이 아니라서, 방금 잰 값이 늦게 보일 수 있어요.
+- 갤럭시워치의 **ECG 원시 데이터와 HRV(RR 간격)는 Health Connect로 넘어오지 않아요.** 그래서 심박수 표준편차 기반 pseudo-HRV로 계산해요.
+- Health Connect는 Android 전용이에요. iOS에서는 건강 데이터가 표시되지 않아요.
+
+## 🩺 혈압계 연동
+
+| 경로 | 방법 | 상태 |
+|---|---|---|
+| **오므론 혈압계** (HEM-7142T2) | 혈압계 → OMRON connect 앱 → Health Connect → NowNow 리포트 | ✅ S24에서 값 일치 확인 |
+| **블루투스 직접 수신** | 내 설정 → 혈압계 연결 → 검색 시작. 표준 혈압 서비스(BLE `0x1810`)로 측정값을 받아 저장 | 🧪 실기기 검증 필요 |
+| **갤럭시워치** | Samsung Health Monitor에서 측정 → Health Connect | ✅ |
+| **직접 입력** | 리포트 혈압 카드에서 수축기 · 이완기 입력 | ✅ |
+
+- 블루투스 직접 수신 코드: [`bloodPressureBluetooth.ts`](src/services/bloodPressureBluetooth.ts) (Android 12 이상)
+- 조사 내용과 확인 순서: [`docs/omron-hem-7142t2-integration.md`](docs/omron-hem-7142t2-integration.md)
+
 ## 📁 폴더 구조
 
 ```
-src
-├─ navigation/     # Root(세션 분기) · Auth · Tab 네비게이터
-├─ screens/        # 화면별 폴더 (컴포넌트·훅·상수·타입을 화면 안에 둠)
+src/
+├─ navigation/       # 로그인 분기 · 하단 탭 (홈 · 채팅 · 리포트 · 내 설정)
+├─ screens/          # 화면별 폴더 (컴포넌트 · 훅 · 상수 · 타입을 화면 안에 둠)
 │   ├─ Home/ Chat/ Report/ Profile/ Login/
-├─ services/       # supabase 클라이언트, API, health/ (에뮬레이터용 목업)
-├─ theme/          # ThemeProvider (라이트/다크), colors, spacing
+├─ services/
+│   ├─ api/          # 백엔드 API 호출
+│   ├─ health/       # Health Connect 동기화 · 목업
+│   ├─ notifications/# 폰에서 예약하는 알림
+│   ├─ delivery/     # 배달앱 열기
+│   └─ bloodPressureBluetooth.ts
+├─ theme/            # 라이트/다크 테마, 색 · 간격
 └─ assets/
 android/app/src/main/java/com/mibandtest/
 └─ HealthConnectModule.kt, HealthConnectPackage.kt
-backend/           # Node.js / Express 서버
-chatbot-server/    # AI 서버 (Cloudflare Worker → OpenAI)
+backend/             # Node.js / Express 서버 (routes · services · jobs · db/migrations · tests)
+chatbot-server/      # AI 서버 (Cloudflare Worker → OpenAI)
+shared/              # 앱 · 서버가 같이 쓰는 코드 (안전 가드레일, 건강 기록 검색)
+docs/                # API 명세, 설계 · 연동 문서
 ```
+
+## 👥 팀 구성
+
+| 팀원 | 맡은 부분 |
+|---|---|
+| [@poohgajoah](https://github.com/poohgajoah) | 건강 데이터 · 백엔드 · 홈 화면 |
+| [@letsggong03](https://github.com/letsggong03) | 챗봇 대화 · 리포트 · 내 설정 · 혈압계 |
+| [@h2st0ry](https://github.com/h2st0ry) | ERD 설계 · 초기 화면 UI/UX · 3D 캐릭터 |
+<!-- TODO: 4번째 팀원 줄 추가 → | [@아이디](https://github.com/아이디) | 맡은 부분 | -->
+
+### [@poohgajoah](https://github.com/poohgajoah)
+- **Health Connect 네이티브 모듈 (Kotlin)**: 삼성헬스 SDK 승인이 기간 안에 나지 않아 Health Connect로 바꾸고, 걸음 수 · 심박수 · 산소포화도 · 혈압 · 수면을 읽는 모듈을 만들어 React Native Bridge로 연결했어요. 갤럭시워치를 직접 차고 테스트했어요.
+- **증분 동기화**: Changes API로 바뀐 기록만 서버에 보내고, 저장에 성공했을 때만 위치를 갱신해 기록이 빠지지 않게 했어요.
+- **스트레스 지수**: HRV 논문을 바탕으로 점수 기준을 정하고, 심박수 표준편차 기반 pseudo-HRV와 100점 만점 `FinalDailyStressScore` 공식을 만들었어요. 매일 새벽 3시 자동 계산도 붙였어요.
+- **DB 구현 (Supabase)**: ERD를 Supabase에 맞게 반영하고, 건강 기록 raw 테이블과 임베딩용 pgvector 컬럼을 설계했어요.
+- **백엔드 · AI 서버**: 앱 데이터가 모두 로그인 확인을 거쳐 백엔드로 가도록 바꾸고, AI 서버(Cloudflare Worker) 중계와 대화 기억 검색을 연결했어요.
+- **홈 화면**: 게임처럼 뿡뿡이를 돌보는 홈(행동 아이콘 줄, 오늘의 선택지, 음악 앨범 자켓)과 새 앱 아이콘을 만들었어요.
+- 로그인 · 회원가입과 세션 유지, 리포트 실시간 · 주간 구성, Android 빌드 오류 해결, 시스템 구성도 작성
+
+### [@letsggong03](https://github.com/letsggong03)
+- **뿡뿡이 대화**: 다정한 말투, 대화에 맞는 할 일 제안(영상 · 음식 · 배달앱 · 음악 · 영화), 오늘의 건강기록 상담
+- **감정일기와 키워드**: 하루 정리에서 스트레스 원인 키워드 자동 분류 · 직접 추가, 리포트 집계 반영
+- **안전 가드레일**: 위험한 수치나 표현을 감지해 도움을 안내 ([`shared/careSafety.js`](shared/careSafety.js))
+- **리포트**: 걸음 수 · 수면 그래프, AI 추천과 기본 추천, 실시간 스트레스 분석, 혈압 직접 입력
+- **내 설정**: 계정 · 별명 · 취향, 알림(하루 마무리 · 날씨 · 놀자 · 안부), 권한 관리
+- **오므론 혈압계 연동**: Health Connect 혈압 표시, 블루투스 직접 수신 코드
+
+### [@h2st0ry](https://github.com/h2st0ry)
+- 서비스 ERD 설계
+- 뿡뿡이 **3D 캐릭터** 디자인 · 모델링 · 애니메이션
+- 전체 화면 UI/UX 디자인과 초기 프론트엔드(화면 · 네비게이션), 다크 모드
+
+## 🧯 트러블슈팅
+
+| 문제 | 해결 |
+|---|---|
+| 삼성헬스 SDK 개발 권한을 기간 내에 받지 못함 | Health Connect로 전환해 Kotlin 모듈을 직접 개발 |
+| Kotlin 모듈이 앱과 따로 동작해 통합이 어려움 | React Native Bridge로 네이티브 모듈을 등록해 JS에서 호출 |
+| 정밀한 HRV에 필요한 ECG 원시 데이터에 접근 불가 | 심박수 표준편차 기반 pseudo-HRV로 대체 |
+| 며칠 만에 앱을 켜면 그 사이 건강 기록이 빠짐 | Changes API 기반 증분 동기화, 저장 성공 시에만 위치 갱신 |
+| iOS 기준 프로젝트라 Android 빌드 실패 | 빌드 설정을 정리해 Android 실기기에서 실행 |
+
+## 🛠️ 기술 스택
+
+| 분야 | 사용 기술 |
+|---|---|
+| 앱 | React Native 0.85, React 19, TypeScript, React Navigation |
+| 네이티브 | Kotlin, Health Connect 1.1.0, Kotlin Coroutines, react-native-ble-plx |
+| 백엔드 | Node.js 22, Express 5 |
+| DB · 인증 | Supabase PostgreSQL, pgvector, Supabase Auth |
+| AI | Cloudflare Workers, OpenAI `gpt-4o-mini` (챗봇), `text-embedding-3-small` + pgvector (대화 기억 검색) |
+| 외부 API | YouTube Data API v3 (음악 추천) |
+| UI | react-native-svg (차트), lucide-react-native, react-native-youtube-iframe, Pretendard |
 
 ## 🔭 앞으로 해볼 것
 
-- 백그라운드 건강 데이터 동기화: 기기 전용 토큰 + WorkManager Worker ([설계](docs/background-sync-design.md))
-- PMS(월경 전 증후군)로 인한 감정 기복 케어용 챗봇 페르소나 확장, 민감 정보 보안 강화
-- Health Connect 설치·지원 여부 확인(`getSdkStatus`)
-- iOS HealthKit 연동
+- **유튜브 뮤직 연동**: 구글 로그인 후 내가 '좋아요' 누른 곡 중에서 장르별 대표곡 보여 주기
+- 오므론 혈압계 블루투스 직접 수신 실기기 검증
+- 백그라운드 건강 데이터 동기화: 기기 전용 토큰 + WorkManager ([설계](docs/background-sync-design.md))
+- 백엔드 HTTPS 배포 (지금은 PC 서버 + USB 연결로 시연)
+- Health Connect 설치 · 지원 여부 확인(`getSdkStatus`), iOS HealthKit 연동
