@@ -68,7 +68,7 @@ const styles = StyleSheet.create({
   inputArea: {
     flexDirection: 'row',
     gap: 10,
-    paddingBottom: 6,
+    paddingBottom: 12,
     paddingHorizontal: 16,
     paddingTop: 10,
   },

@@ -1,7 +1,6 @@
 import React, {useEffect, useRef} from 'react';
 import {Animated, StyleSheet, View} from 'react-native';
 
-import Text from '../../../components/AppText';
 import {useAppTheme} from '../../../theme/ThemeProvider';
 import type {MoodType} from '../types';
 import CharacterMessage from './CharacterMessage';
@@ -11,14 +10,16 @@ interface CharacterStageProps {
   mood: MoodType;
   isInteracting: boolean;
   height: number;
-  // 방 위에 겹쳐 놓을 것(가장자리 행동 버튼)
+  // 선택지가 열려 방이 작아지면 말풍선이 아이콘 줄을 덮어서 숨긴다.
+  hideMessage?: boolean;
+  // 방 위쪽에 놓을 것(행동 아이콘 줄)
   children?: React.ReactNode;
 }
 
 // 방 색. 다크 모드에서는 어둡게 바꾼다.
 const ROOM = {
-  light: {wall: '#F8FBF5', floor: '#DCEBD2', shadow: '#C3D8B6', sky: '#E4F1F6'},
-  dark: {wall: '#252722', floor: '#30332D', shadow: '#1E201B', sky: '#2E3A40'},
+  light: {wall: '#F8FBF5', floor: '#DCEBD2', shadow: '#C3D8B6'},
+  dark: {wall: '#252722', floor: '#30332D', shadow: '#1E201B'},
 };
 
 // 돌봐 주면 떠오르는 하트 (가로 위치, 늦게 출발하는 정도)
@@ -28,11 +29,12 @@ const HEARTS = [
   {left: 50, delay: 240},
 ];
 
-// 캐릭터가 사는 방: 벽·바닥·장식, 말풍선, 캐릭터, 하트 효과
+// 캐릭터가 사는 방: 위쪽 행동 아이콘 줄, 벽·바닥, 말풍선, 캐릭터, 하트 효과
 export default function CharacterStage({
   mood,
   isInteracting,
   height,
+  hideMessage = false,
   children,
 }: CharacterStageProps) {
   const {theme} = useAppTheme();
@@ -57,18 +59,12 @@ export default function CharacterStage({
 
   return (
     <View style={[styles.room, {backgroundColor: room.wall, height}]}>
-      <View
-        style={[
-          styles.window,
-          {backgroundColor: room.sky, borderColor: room.floor},
-        ]}>
-        <Text style={styles.windowSky}>☁️</Text>
-      </View>
-
       <View style={[styles.floor, {backgroundColor: room.floor}]} />
 
+      {children}
+
       <View style={styles.content}>
-        <CharacterMessage userMood={mood} />
+        {!hideMessage && <CharacterMessage userMood={mood} />}
 
         <View style={styles.characterArea}>
           {HEARTS.map(({left}, index) => (
@@ -106,8 +102,6 @@ export default function CharacterStage({
           <CharacterPet mood={mood} isInteracting={isInteracting} />
         </View>
       </View>
-
-      {children}
     </View>
   );
 }
@@ -117,20 +111,6 @@ const styles = StyleSheet.create({
     borderRadius: 26,
     overflow: 'hidden',
     paddingTop: 16,
-  },
-  window: {
-    alignItems: 'center',
-    borderRadius: 14,
-    borderWidth: 4,
-    height: 64,
-    justifyContent: 'center',
-    left: 18,
-    position: 'absolute',
-    top: 104,
-    width: 72,
-  },
-  windowSky: {
-    fontSize: 24,
   },
   floor: {
     bottom: 0,

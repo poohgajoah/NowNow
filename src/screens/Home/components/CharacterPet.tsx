@@ -135,13 +135,13 @@ export default function CharacterPet({isInteracting, mood}: CharacterPetProps) {
 const styles = StyleSheet.create({
   stage: {
     alignItems: 'center',
-    height: 210,
+    height: 290,
     justifyContent: 'flex-end',
     width: '100%',
   },
   character: {
-    height: 200,
-    width: 200,
+    height: 280,
+    width: 280,
   },
   mood: {position: 'absolute', top: 12, right: '27%', fontSize: 25},
 });

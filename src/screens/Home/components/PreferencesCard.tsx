@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React from 'react';
 import {Modal, Pressable, ScrollView, StyleSheet, View} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
@@ -15,10 +15,15 @@ import type {PreferenceKey, UserPreferences} from '../types';
 
 interface PreferencesCardProps {
   preferences: UserPreferences;
+  // 아래 창에 보여 줄 종류. 홈 화면이 정한다(고르자마자 열 수 있게).
+  detailKey: PreferenceKey | null;
+  onDetailKeyChange: (key: PreferenceKey | null) => void;
+  // 추천곡 창을 열 때 처음부터 골라 둘 곡
+  musicVideoId?: string | null;
 }
 
 // 눌렀을 때 아래 창에서 더 보여 줄 게 있는 종류
-const hasDetail = (key: PreferenceKey) => key === 'feed' || key === 'music';
+export const hasDetail = (key: PreferenceKey) => key === 'feed' || key === 'music';
 
 function DeliveryButtons() {
   const {theme} = useAppTheme();
@@ -48,10 +53,14 @@ function DeliveryButtons() {
 }
 
 // 오늘 고른 것들. 먹이·음악을 누르면 아래에서 창이 올라와 배달앱·추천곡을 보여 준다.
-export default function PreferencesCard({preferences}: PreferencesCardProps) {
+export default function PreferencesCard({
+  preferences,
+  detailKey,
+  onDetailKeyChange: setDetailKey,
+  musicVideoId = null,
+}: PreferencesCardProps) {
   const {theme} = useAppTheme();
   const insets = useSafeAreaInsets();
-  const [detailKey, setDetailKey] = useState<PreferenceKey | null>(null);
   const chosen = interactionActions.filter(({key}) => preferences[key]);
 
   if (chosen.length === 0) {
@@ -108,7 +117,10 @@ export default function PreferencesCard({preferences}: PreferencesCardProps) {
               </Text>
               {detailKey === 'feed' && <DeliveryButtons />}
               {detailKey === 'music' && detailChoice && (
-                <MusicRecommendation choice={detailChoice} />
+                <MusicRecommendation
+                  choice={detailChoice}
+                  initialVideoId={musicVideoId}
+                />
               )}
             </ScrollView>
           </View>

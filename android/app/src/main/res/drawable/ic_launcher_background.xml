@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 앱 아이콘 배경: 아이콘 그림과 같은 초록 → 분홍 그라데이션 -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <gradient android:angle="270" android:startColor="#DAF3C9" android:endColor="#FDBCC7" />
+</shape>
