@@ -1,10 +1,9 @@
 import React, {useEffect, useRef} from 'react';
 import {Animated, Pressable, StyleSheet, View} from 'react-native';
-import {Check} from 'lucide-react-native';
 
 import Text from '../../../components/AppText';
 import {useAppTheme} from '../../../theme/ThemeProvider';
-import {completedMessages, interactionActions} from '../constants/homeContent';
+import {interactionActions} from '../constants/homeContent';
 import type {PreferenceKey, UserPreferences} from '../types';
 
 interface ActionBarProps {
@@ -30,15 +29,10 @@ function ActionIcon({
   onPress: () => void;
 }) {
   const {theme} = useAppTheme();
-  // 아직 안 한 아이콘은 통통 튀어서 눌러 달라는 느낌을 준다. 아이콘마다 박자를 엇갈린다.
+  // 아이콘은 늘 통통 튄다. 아이콘마다 박자를 엇갈린다.
   const bounceAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    if (completed) {
-      bounceAnim.setValue(0);
-      return;
-    }
-
     const bouncing = Animated.loop(
       Animated.sequence([
         Animated.delay(index * 200),
@@ -56,12 +50,11 @@ function ActionIcon({
     );
     bouncing.start();
     return () => bouncing.stop();
-  }, [bounceAnim, completed, index]);
+  }, [bounceAnim, index]);
 
   return (
     <Pressable
       accessibilityLabel={action.label}
-      disabled={completed}
       onPress={onPress}
       style={({pressed}) => [styles.item, pressed && styles.pressed]}>
       <Animated.View
@@ -79,15 +72,9 @@ function ActionIcon({
             ],
           },
         ]}>
-        <Text style={[styles.emoji, completed && styles.completedEmoji]}>
-          {action.emoji}
-        </Text>
-        {completed ? (
-          <View style={[styles.badge, {backgroundColor: theme.stressNormal}]}>
-            <Check color="#FFFFFF" size={10} strokeWidth={3.5} />
-          </View>
-        ) : (
-          // 오늘 아직 안 한 행동 표시
+        <Text style={styles.emoji}>{action.emoji}</Text>
+        {/* 오늘 아직 안 한 행동 표시. 고른 뒤에도 아이콘 모양은 그대로 둔다. */}
+        {!completed && (
           <View style={[styles.badge, {backgroundColor: theme.accent}]}>
             <Text style={styles.badgeMark}>!</Text>
           </View>
@@ -97,10 +84,10 @@ function ActionIcon({
         numberOfLines={1}
         style={[
           styles.label,
-          {color: completed ? theme.textMuted : theme.text},
+          {color: theme.text},
           selected && {color: theme.accent},
         ]}>
-        {completed ? completedMessages[action.key] : action.label}
+        {action.label}
       </Text>
     </Pressable>
   );
@@ -157,9 +144,6 @@ const styles = StyleSheet.create({
   },
   emoji: {
     fontSize: 38,
-  },
-  completedEmoji: {
-    opacity: 0.4,
   },
   badge: {
     alignItems: 'center',

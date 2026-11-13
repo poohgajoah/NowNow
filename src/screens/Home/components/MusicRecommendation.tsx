@@ -21,15 +21,27 @@ import {useAppTheme} from '../../../theme/ThemeProvider';
 
 interface MusicRecommendationProps {
   choice: string;
+  // 처음부터 골라 둘 곡(홈에서 앨범 자켓을 눌러 들어온 경우)
+  initialVideoId?: string | null;
 }
 
 const ART_SIZE = 132;
 const ART_BORDER = 3; // 고른 곡 테두리
 const ART_INNER = ART_SIZE - ART_BORDER * 2;
+
 // 유튜브 썸네일(4:3)은 16:9 영상 위아래에 검은 띠가 있다.
-// 띠를 빼고 영상 부분이 정사각형을 꽉 채우도록 키워서 가운데만 보여 준다.
-const ART_IMAGE_HEIGHT = ART_INNER / 0.75;
-const ART_IMAGE_WIDTH = (ART_IMAGE_HEIGHT * 4) / 3;
+// 띠를 빼고 영상 부분이 정사각형(size)을 꽉 채우도록 키워서 가운데만 보여 준다.
+export const coverImageStyle = (size: number) => {
+  const height = size / 0.75;
+  const width = (height * 4) / 3;
+  return {
+    height,
+    left: -(width - size) / 2,
+    position: 'absolute' as const,
+    top: -(height - size) / 2,
+    width,
+  };
+};
 
 // 유튜브 뮤직 앱이 있으면 앱에서, 없으면 웹(브라우저)에서 열린다.
 const openInYouTubeMusic = (videoId: string) =>
@@ -59,7 +71,7 @@ function AlbumCard({
           selected && {borderColor: theme.accent},
         ]}>
         {track.thumbnail && (
-          <Image source={{uri: track.thumbnail}} style={styles.artImage} />
+          <Image source={{uri: track.thumbnail}} style={coverImageStyle(ART_INNER)} />
         )}
         <View style={[styles.playBadge, selected && {backgroundColor: theme.accent}]}>
           <Play color="#FFFFFF" fill="#FFFFFF" size={13} />
@@ -76,7 +88,10 @@ function AlbumCard({
 }
 
 // 오늘의 추천곡 갤러리: 정사각형 앨범 자켓 + 곡명 + 아티스트. 누르면 위에 플레이어가 열린다.
-export default function MusicRecommendation({choice}: MusicRecommendationProps) {
+export default function MusicRecommendation({
+  choice,
+  initialVideoId = null,
+}: MusicRecommendationProps) {
   const {theme} = useAppTheme();
   const [tracks, setTracks] = useState<MusicTrack[] | null>(null);
   const [failed, setFailed] = useState(false);
@@ -87,7 +102,7 @@ export default function MusicRecommendation({choice}: MusicRecommendationProps) 
     let cancelled = false;
     setTracks(null);
     setFailed(false);
-    setSelectedId(null);
+    setSelectedId(initialVideoId);
 
     getMusicRecommendations(choice)
       .then(result => !cancelled && setTracks(result))
@@ -99,7 +114,7 @@ export default function MusicRecommendation({choice}: MusicRecommendationProps) 
     return () => {
       cancelled = true;
     };
-  }, [choice]);
+  }, [choice, initialVideoId]);
 
   if (failed) {
     return (
@@ -199,13 +214,6 @@ const styles = StyleSheet.create({
     height: ART_SIZE,
     overflow: 'hidden',
     width: ART_SIZE,
-  },
-  artImage: {
-    height: ART_IMAGE_HEIGHT,
-    left: -(ART_IMAGE_WIDTH - ART_INNER) / 2,
-    position: 'absolute',
-    top: -(ART_IMAGE_HEIGHT - ART_INNER) / 2,
-    width: ART_IMAGE_WIDTH,
   },
   playBadge: {
     alignItems: 'center',

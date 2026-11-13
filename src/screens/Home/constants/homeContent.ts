@@ -11,15 +11,8 @@ export const interactionActions: {
   label: string;
   emoji: string;
 }[] = [
-  {key: 'feed', label: '먹이', emoji: '🍙'},
+  {key: 'feed', label: '밥주기', emoji: '🍚'},
   {key: 'play', label: '놀이', emoji: '🎾'},
   {key: 'music', label: '음악', emoji: '🎧'},
   {key: 'hobby', label: '휴식', emoji: '🛁'},
 ];
-
-export const completedMessages: Record<PreferenceKey, string> = {
-  feed: '배불러요!',
-  play: '즐거워요!',
-  music: '흥얼거려요!',
-  hobby: '편안해요!',
-};
