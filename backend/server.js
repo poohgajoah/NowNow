@@ -3,7 +3,6 @@ const cors = require("cors");
 require("dotenv").config();
 
 const authRoutes = require("./routes/auth");
-const communityRoutes = require("./routes/community");
 const chatRoutes = require("./routes/chat");
 const reportRoutes = require("./routes/report");
 const stressRoutes = require("./routes/stress");
@@ -21,7 +20,6 @@ app.use(cors());
 app.use(express.json({ limit: "5mb" }));
 
 app.use("/api/auth", authRoutes);
-app.use("/api/community", communityRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/stress", stressRoutes);
