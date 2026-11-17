@@ -65,9 +65,15 @@ react {
  * Set this to true to Run Proguard on Release builds to minify the Java bytecode.
  */
 def enableProguardInReleaseBuilds = false
+// 앱이 접속할 백엔드 주소. 비우면 에뮬레이터는 10.0.2.2, 실기기는 127.0.0.1(USB adb reverse)로 접속한다.
+// - 배포 서버: https://주소
+// - 시연용 노트북(같은 와이파이·핫스팟): http://내부망IP:5000  (예: Windows 핫스팟 http://192.168.137.1:5000)
+//   http는 debug 빌드에서만 허용되므로 -PnownowBundledTest와 함께 debug로 빌드한다(npm run build:demo-apk).
 def nowNowApiBaseUrl = (findProperty("nownowApiBaseUrl") ?: "").toString().trim()
-if (nowNowApiBaseUrl && !(nowNowApiBaseUrl ==~ /https:\/\/[A-Za-z0-9.-]+(:[0-9]+)?\/?/)) {
-    throw new GradleException("nownowApiBaseUrl must be an HTTPS origin")
+def httpsOrigin = /https:\/\/[A-Za-z0-9.-]+(:[0-9]+)?\/?/
+def privateHttpOrigin = /http:\/\/(10(\.\d{1,3}){3}|192\.168(\.\d{1,3}){2}|172\.(1[6-9]|2\d|3[01])(\.\d{1,3}){2})(:[0-9]+)?\/?/
+if (nowNowApiBaseUrl && !(nowNowApiBaseUrl ==~ httpsOrigin || nowNowApiBaseUrl ==~ privateHttpOrigin)) {
+    throw new GradleException("nownowApiBaseUrl must be an HTTPS origin or an http:// private network IP (e.g. http://192.168.137.1:5000)")
 }
 
 /**
