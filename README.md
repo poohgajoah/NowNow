@@ -123,44 +123,64 @@ NowNow는 이러한 문제를 해결하기 위해 스마트워치 건강 데이�
 
 ## 시스템 아키텍처
 
-```text
- Galaxy Watch / Android Health Apps       BLE Blood Pressure Monitor
-                 │                                  │
-                 ▼                                  ▼
-           Samsung Health                    React Native BLE
-                 │                                  │
-                 ▼                                  │
-            Health Connect                          │
-                 │                                  │
-                 ▼                                  │
-      Kotlin HealthConnectModule ◀──────────────────┘
-          (React Native Bridge)
-                 │
-                 ▼
-          React Native App
-                 │
-        Supabase Auth Access Token
-                 │
-                 ▼
-       Node.js / Express Backend
-          │          │           │
-          │          │           └── Supabase PostgreSQL
-          │          │                 ├─ 사용자·설정
-          │          │                 ├─ 건강 기록
-          │          │                 ├─ 채팅·요약
-          │          │                 ├─ 스트레스 점수·리포트
-          │          │                 └─ pgvector 임베딩
-          │          │
-          │          └── OpenAI Embeddings
-          │               (text-embedding-3-small)
-          │
-          └── AI Relay
-                 │
-                 ▼
-        Cloudflare Worker
-                 │
-                 ▼
-           OpenAI gpt-4o-mini
+```mermaid
+flowchart TB
+  subgraph SOURCE["건강 데이터 소스"]
+    WATCH["Galaxy Watch"]
+    SAMSUNG["Samsung Health"]
+    BP["BLE 혈압계"]
+    WATCH --> SAMSUNG
+  end
+
+  subgraph MOBILE["Android 앱"]
+    HC["Health Connect"]
+    NATIVE["Kotlin HealthConnectModule<br/>(React Native Bridge)"]
+    BLE["React Native BLE"]
+    APP["React Native 앱"]
+    SAMSUNG --> HC
+    HC --> NATIVE
+    BP --> BLE
+    NATIVE --> APP
+    BLE --> APP
+  end
+
+  subgraph BACKEND["백엔드 서버"]
+    API["Node.js / Express"]
+    STRESS["건강 데이터 처리<br/>스트레스 점수·리포트 계산"]
+    MEMORY["대화 요약·기억 검색"]
+    API --> STRESS
+    API --> MEMORY
+  end
+
+  subgraph DATA["데이터 저장소"]
+    DB[("Supabase PostgreSQL")]
+    VECTOR[("pgvector")]
+    DB --- VECTOR
+  end
+
+  subgraph AI["AI 서비스"]
+    WORKER["Cloudflare Worker<br/>(AI Relay)"]
+    CHAT["OpenAI gpt-4o-mini"]
+    EMBED["OpenAI Embeddings<br/>text-embedding-3-small"]
+    WORKER --> CHAT
+  end
+
+  APP -->|"건강 기록 동기화·API 요청<br/>Supabase Auth Access Token"| API
+  API -->|"건강 기록·채팅·계산 결과 저장/조회"| DB
+  MEMORY <-->|"임베딩 저장·유사도 검색"| VECTOR
+  API -->|"대화 기억 임베딩 생성"| EMBED
+  API -->|"AI 요청"| WORKER
+  WORKER -->|"생성 결과"| API
+  API -->|"응답·리포트 데이터"| APP
+
+  classDef mobile fill:#eaf4ff,stroke:#4c86c6,color:#18324b
+  classDef backend fill:#eaf7ee,stroke:#4d9664,color:#183b25
+  classDef data fill:#fff4df,stroke:#c28a32,color:#51380d
+  classDef ai fill:#f4edff,stroke:#8662b5,color:#35234d
+  class HC,NATIVE,BLE,APP mobile
+  class API,STRESS,MEMORY backend
+  class DB,VECTOR data
+  class WORKER,CHAT,EMBED ai
 ```
 
 ### 데이터 처리 흐름
