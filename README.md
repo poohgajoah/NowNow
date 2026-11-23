@@ -153,9 +153,9 @@ flowchart TB
   end
 
   subgraph DATA["데이터 저장소"]
-    DB[("Supabase PostgreSQL")]
-    VECTOR[("pgvector")]
-    DB --- VECTOR
+    DB[("Supabase PostgreSQL<br/>pgvector 확장 포함<br/>memory_embeddings · chat_summaries")]
+    RPC["PostgreSQL RPC<br/>match_nownow_chat_memories()"]
+    DB --- RPC
   end
 
   subgraph AI["AI 서비스"]
@@ -167,8 +167,11 @@ flowchart TB
 
   APP -->|"건강 기록 동기화·API 요청<br/>Supabase Auth Access Token"| API
   API -->|"건강 기록·채팅·계산 결과 저장/조회"| DB
-  MEMORY <-->|"임베딩 저장·유사도 검색"| VECTOR
-  API -->|"대화 기억 임베딩 생성"| EMBED
+  MEMORY -->|"질문·요약 텍스트 임베딩 요청"| EMBED
+  EMBED -->|"1536차원 벡터 반환"| MEMORY
+  MEMORY -->|"Supabase SDK로 벡터 저장·조회"| DB
+  MEMORY -->|"RPC 호출: 질문 벡터 전달"| RPC
+  RPC -->|"pgvector 코사인 거리 검색"| DB
   API -->|"AI 요청"| WORKER
   WORKER -->|"생성 결과"| API
   API -->|"응답·리포트 데이터"| APP
@@ -179,7 +182,7 @@ flowchart TB
   classDef ai fill:#f4edff,stroke:#8662b5,color:#35234d
   class HC,NATIVE,BLE,APP mobile
   class API,STRESS,MEMORY backend
-  class DB,VECTOR data
+  class DB,RPC data
   class WORKER,CHAT,EMBED ai
 ```
 
