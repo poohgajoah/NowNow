@@ -183,6 +183,121 @@ flowchart TB
   class WORKER,CHAT,EMBED ai
 ```
 
+### 데이터베이스 ERD
+
+Supabase PostgreSQL의 사용자별 데이터 구조와 확인 가능한 외래 키 관계를 나타냅니다. `auth.users`를 기준으로 사용자 프로필, 건강 원본 기록, 스트레스 계산 결과, 대화 데이터 및 앱 설정 데이터를 관리합니다.
+
+```mermaid
+erDiagram
+    AUTH_USERS ||--o{ USER_INFORMATIONS : "user_id"
+    AUTH_USERS ||--o{ HEART_RATE_RECORDS : "user_id"
+    AUTH_USERS ||--o{ STEPS_RECORDS : "user_id"
+    AUTH_USERS ||--o{ BLOOD_PRESSURE_RECORDS : "user_id"
+    AUTH_USERS ||--o{ OXYGEN_RECORDS : "user_id"
+    AUTH_USERS ||--o{ SLEEP_RECORDS : "user_id"
+    AUTH_USERS ||--o{ DAILY_STRESS_SCORES : "user_id"
+    AUTH_USERS ||--o{ DAILY_MOODS : "user_id"
+    AUTH_USERS ||--o{ CHAT_MESSAGES : "user_id"
+    AUTH_USERS ||--o{ CHAT_SUMMARIES : "user_id"
+    AUTH_USERS ||--o{ MEMORY_EMBEDDINGS : "user_id"
+    AUTH_USERS ||--o{ CHARACTER_INTERACTIONS : "user_id"
+    AUTH_USERS ||--o{ PUSH_TOKENS : "user_id"
+    AUTH_USERS ||--o{ HEALTH_REPORTS : "user_id"
+
+    CHAT_SUMMARIES ||--o| MEMORY_EMBEDDINGS : "nownow_summary_id"
+
+    AUTH_USERS {
+        uuid id PK
+    }
+    USER_INFORMATIONS {
+        uuid user_id FK
+        text status_message
+        smallint stress_threshold
+        time notify_time
+    }
+    HEART_RATE_RECORDS {
+        uuid user_id FK
+        text source_record_id
+        text data_origin
+        timestamptz measured_at
+    }
+    STEPS_RECORDS {
+        uuid user_id FK
+        timestamptz start_time
+        timestamptz end_time
+    }
+    BLOOD_PRESSURE_RECORDS {
+        uuid user_id FK
+        text source_record_id
+        text data_origin
+        timestamptz measured_at
+    }
+    OXYGEN_RECORDS {
+        uuid user_id FK
+        text source_record_id
+        text data_origin
+        timestamptz measured_at
+    }
+    SLEEP_RECORDS {
+        bigint sleep_id PK
+        uuid user_id FK
+        timestamptz start_time
+        timestamptz end_time
+        integer duration_minutes
+    }
+    DAILY_STRESS_SCORES {
+        bigint daily_stress_id PK
+        uuid user_id FK
+        date record_date
+        numeric final_score
+        text_array missing
+    }
+    DAILY_MOODS {
+        bigint mood_id PK
+        uuid user_id FK
+        date record_date
+        text mood
+    }
+    CHAT_MESSAGES {
+        uuid user_id FK
+        timestamptz created_at
+    }
+    CHAT_SUMMARIES {
+        bigint summary_id PK
+        uuid user_id FK
+        text_array keywords
+        timestamptz created_at
+    }
+    MEMORY_EMBEDDINGS {
+        uuid user_id FK
+        bigint nownow_summary_id FK
+        vector embedding
+    }
+    CHARACTER_INTERACTIONS {
+        bigint interaction_id PK
+        uuid user_id FK
+        text action
+        text choice
+    }
+    PUSH_TOKENS {
+        bigint push_token_id PK
+        uuid user_id FK
+        text token
+        text platform
+    }
+    HEALTH_REPORTS {
+        uuid user_id FK
+        timestamptz measured_at
+    }
+```
+
+- **건강 원본 데이터:** 심박수·걸음 수·혈압·산소포화도·수면 기록을 사용자별로 저장합니다. Health Connect 증분 동기화 데이터는 지원 테이블에 원본 레코드 ID와 데이터 출처를 함께 기록합니다.
+- **스트레스 결과:** `daily_stress_scores`에 날짜별 계산 결과와 계산에 사용한 지표, 누락 데이터 정보를 저장합니다. 점수는 백엔드에서 계산하고 앱은 조회합니다.
+- **대화 및 기억:** `chat_messages`와 `chat_summaries`를 사용자별로 관리하며, `memory_embeddings.nownow_summary_id`가 요약 테이블을 참조해 pgvector 유사도 검색에 사용됩니다.
+- **앱 상태:** 기분 기록, 캐릭터 상호작용, 푸시 토큰을 사용자별로 분리해 저장합니다.
+
+> ERD는 저장소의 SQL 마이그레이션에서 확인되는 테이블과 FK를 중심으로 정리한 논리 구조입니다. 전체 컬럼을 나열한 물리 스키마 덤프는 아니며, 실제 DB에만 존재하거나 마이그레이션 파일에서 관계를 확인할 수 없는 테이블·컬럼은 생략했습니다.
+
 ### 데이터 처리 흐름
 
 1. 앱이 Health Connect에서 건강 기록을 읽습니다.
