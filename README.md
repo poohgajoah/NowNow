@@ -669,3 +669,4 @@ node --test
 - [백그라운드 동기화 설계](docs/background-sync-design.md)
 - [오므론 HEM-7142T2 연동 조사](docs/omron-hem-7142t2-integration.md)
 - [챗봇 통합 문서](CHATBOT_INTEGRATION.md)
+- [챗봇 백엔드 구조 분석 및 개선 검토 (@poohgajoah)](CHATBOT_IMPROVEMENT.md)
