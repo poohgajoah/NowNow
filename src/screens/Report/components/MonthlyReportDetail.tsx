@@ -1,8 +1,8 @@
-import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import {ActivityIndicator, BackHandler, StyleSheet, View} from 'react-native';
 import Text from '../../../components/AppText';
 
-import {format, getDay, parseISO, subMonths} from 'date-fns';
+import {format, getDay, parseISO} from 'date-fns';
 
 import {useAppTheme} from '../../../theme/ThemeProvider';
 import {getStressLevel, stressLevels} from '../constants/reportData';
@@ -14,24 +14,20 @@ import DetailHeader from './DetailHeader';
 import HealthCard from './HealthCard';
 import ReportCard from './ReportCard';
 import KeywordDonut from './KeywordDonut';
-import WeeklyReportItem, {ReportList} from './WeeklyReportItem';
+import LetterNote from './LetterNote';
+
+// 한글 설명을 단어가 아니라 글자 단위로 줄바꿈해서 줄 끝까지 채운다.
+// 글자 사이에 폭 없는 공백(U+200B)을 넣어 어디서든 줄이 바뀔 수 있게 한다.
+const fillLines = (text: string) => text.replace(/([가-힣])(?=[가-힣])/g, '$1' + String.fromCharCode(0x200b));
 
 // UI 확인용: true 면 서버 대신 목업 데이터로 월간 리포트를 그린다.
 const USE_MONTHLY_MOCK = false;
-const MONTH_COUNT = 3;
 const WEEKDAYS = ['월', '화', '수', '목', '금', '토', '일'];
 
-interface Month {
+export interface Month {
   key: string; // YYYY-MM
   label: string;
 }
-
-// 이번 달부터 최근 달을 최신순으로
-const getRecentMonths = (count: number, baseDate = new Date()): Month[] =>
-  Array.from({length: count}, (_, index) => {
-    const date = subMonths(baseDate, index);
-    return {key: format(date, 'yyyy-MM'), label: format(date, 'yyyy년 M월')};
-  });
 
 const hours = (minutes: number | null) => (minutes === null ? '-' : String(Math.round((minutes / 60) * 10) / 10));
 const count = (value: number | null) => (value === null ? '-' : Math.round(value).toLocaleString());
@@ -147,7 +143,15 @@ function StressCalendar({report, highlighted}: {report: MonthlyReportData; highl
 }
 
 // 일간 탭의 '뿡뿡이의 스트레스 원인 분석' 카드와 같은 모양
-function MonthlyAnalysisCard({analysis, keywords, calendar}: {
+// 편지로 볼 때는 카드 제목·안내도 캐릭터 말투로
+const TITLES = {
+  report: {cause: '이번 달 스트레스 원인', others: '이런 날도 스트레스가 높았어요', note: '이번 달 하루 정리와 스트레스 점수로 본 경향이에요. 진단이 아니에요.', calendar: '날짜별 스트레스'},
+  letter: {cause: '너를 힘들게 한 것들', others: '이런 날도 많이 힘들어 보였어', note: '내가 하루 정리랑 스트레스 점수를 보고 느낀 거라, 진단은 아니야.', calendar: '하루하루 마음 날씨'},
+};
+type Titles = typeof TITLES.report;
+
+function MonthlyAnalysisCard({analysis, keywords, calendar, titles = TITLES.report}: {
+  titles?: Titles;
   analysis: MonthlyReportData['analysis'];
   keywords?: React.ReactNode;
   calendar?: React.ReactNode;
@@ -157,7 +161,7 @@ function MonthlyAnalysisCard({analysis, keywords, calendar}: {
   const others = rest.filter(cause => cause.label !== top?.label).slice(0, 2);
   return (
     <ReportCard>
-      <CardHeader title="이번 달 스트레스 원인" />
+      <CardHeader title={titles.cause} />
 
       {/* 숫자보다 '무엇이 원인인지'가 먼저 읽히게: 원인 이름을 크게, 설명은 문장으로 */}
       {top ? (
@@ -165,13 +169,13 @@ function MonthlyAnalysisCard({analysis, keywords, calendar}: {
           {/* 가장 큰 원인: 이름은 왼쪽에 크게, 설명은 오른쪽에 */}
           <View style={styles.topCause}>
             <Text style={[styles.topCauseName, {color: theme.text}]}>{top.label}</Text>
-            <Text style={[styles.topCauseText, {color: theme.text}]}>{top.conclusion}</Text>
+            <Text textBreakStrategy="simple" style={[styles.topCauseText, {color: theme.text}]}>{fillLines(top.conclusion)}</Text>
           </View>
 
           {others.length > 0 && (
             // 구분선은 '이런 날도…' 소제목 위에, 아래 줄들 사이에는 첫 줄 빼고 선
             <View style={[styles.others, {borderTopColor: theme.border}]}>
-              <Text style={[styles.causeName, {color: theme.text}]}>이런 날도 스트레스가 높았어요</Text>
+              <Text style={[styles.causeName, {color: theme.text}]}>{titles.others}</Text>
               {others.map((cause, index) => (
                 <View
                   key={`${cause.kind}:${cause.label}`}
@@ -197,14 +201,14 @@ function MonthlyAnalysisCard({analysis, keywords, calendar}: {
       {/* 원그래프 아래, 달력 구분선 위 */}
       {top && (
         <Text style={[styles.note, {color: theme.textMuted}]}>
-          이번 달 하루 정리와 스트레스 점수로 본 경향이에요. 진단이 아니에요.
+          {titles.note}
         </Text>
       )}
 
       {calendar && (
         <>
           <View style={[styles.sectionDivider, {backgroundColor: theme.border}]} />
-          <Text style={[styles.sectionTitle, {color: theme.text}]}>날짜별 스트레스</Text>
+          <Text style={[styles.sectionTitle, {color: theme.text}]}>{titles.calendar}</Text>
           {calendar}
         </>
       )}
@@ -212,9 +216,18 @@ function MonthlyAnalysisCard({analysis, keywords, calendar}: {
   );
 }
 
-function MonthlyReportDetail({month, onBack}: {month: Month; onBack: () => void}) {
+// 월간 스트레스 리포트 화면. 홈의 우체통에서 '편지'로 연다.
+// initialReport: 우체통이 미리 받아 둔 데이터가 있으면 다시 부르지 않는다.
+export default function MonthlyReportDetail({month, onBack, backLabel = '월간', initialReport = null, letter}: {
+  month: Month;
+  onBack: () => void;
+  backLabel?: string;
+  initialReport?: MonthlyReportData | null;
+  // 우체통 편지로 볼 때: 맨 위에 캐릭터 편지글을 붙이고 제목들을 캐릭터 말투로 바꾼다.
+  letter?: {month: number; inProgress: boolean};
+}) {
   const {theme} = useAppTheme();
-  const [report, setReport] = useState<MonthlyReportData | null>(null);
+  const [report, setReport] = useState<MonthlyReportData | null>(initialReport);
   const [unavailable, setUnavailable] = useState(false);
   const [selectedCause, setSelectedCause] = useState<string | null>(null);
 
@@ -224,11 +237,12 @@ function MonthlyReportDetail({month, onBack}: {month: Month; onBack: () => void}
       setReport(createMockMonthlyReport(month.key));
       return;
     }
+    if (initialReport) return;
     getMonthlyReport(month.key)
       .then(data => {if (active) setReport(data);})
       .catch(() => {if (active) setUnavailable(true);});
     return () => {active = false;};
-  }, [month.key]);
+  }, [month.key, initialReport]);
 
   useEffect(() => {
     const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
@@ -249,7 +263,7 @@ function MonthlyReportDetail({month, onBack}: {month: Month; onBack: () => void}
   return (
     <>
       <DetailHeader
-        backLabel="월간"
+        backLabel={backLabel}
         onBack={onBack}
         title={month.label}
         subtitle={report ? `${format(parseISO(report.from), 'M.d')} ~ ${format(parseISO(report.to), 'M.d')}` : undefined}
@@ -261,7 +275,8 @@ function MonthlyReportDetail({month, onBack}: {month: Month; onBack: () => void}
             <ActivityIndicator style={styles.loading} color={theme.accent} />
           ) : (
             <Text style={[styles.muted, {color: theme.textMuted}]}>
-              {unavailable ? '월간 기록을 불러오지 못했어요. 서버 연결을 확인해 주세요.' : '이 달에 표시할 스트레스 기록이 없어요.'}
+              {unavailable ? '월간 기록을 불러오지 못했어요. 서버 연결을 확인해 주세요.'
+                : letter ? '아직 편지에 쓸 기록이 없어. 하루 이야기를 들려주면 차곡차곡 적어 둘게!' : '이 달에 표시할 스트레스 기록이 없어요.'}
             </Text>
           )}
         </ReportCard>
@@ -269,7 +284,9 @@ function MonthlyReportDetail({month, onBack}: {month: Month; onBack: () => void}
         <>
           {/* 원인 분석 카드 안에 키워드 버튼: 누르면 아래 달력에 그 원인이 나온 날이 칠해진다. */}
           {/* 원인 분석 + 키워드 + 달력을 한 카드로 (키워드를 누르면 바로 아래 달력이 바뀐다) */}
+          {letter && <LetterNote report={report} month={letter.month} inProgress={letter.inProgress} />}
           <MonthlyAnalysisCard
+            titles={letter ? TITLES.letter : TITLES.report}
             analysis={report.analysis}
             keywords={report.causes.length > 0 && (
               <KeywordDonut
@@ -284,32 +301,6 @@ function MonthlyReportDetail({month, onBack}: {month: Month; onBack: () => void}
         </>
       )}
     </>
-  );
-}
-
-export default function MonthlyReport({onDetailChange}: {onDetailChange?: (open: boolean) => void}) {
-  const months = useMemo(() => getRecentMonths(MONTH_COUNT), []);
-  const [selected, setSelected] = useState<Month | null>(null);
-  const handleBack = useCallback(() => setSelected(null), []);
-
-  // 상세 화면이 열리고 닫히는 걸 리포트 화면에 알린다 (맨 위 제목·탭 숨김용)
-  useEffect(() => {
-    onDetailChange?.(selected !== null);
-  }, [selected, onDetailChange]);
-
-  if (selected) return <MonthlyReportDetail month={selected} onBack={handleBack} />;
-
-  return (
-    <ReportList>
-      {months.map((month, index) => (
-        <WeeklyReportItem
-          key={month.key}
-          title={month.label}
-          last={index === months.length - 1}
-          onPress={() => setSelected(month)}
-        />
-      ))}
-    </ReportList>
   );
 }
 

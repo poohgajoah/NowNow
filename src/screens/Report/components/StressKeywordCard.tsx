@@ -4,12 +4,12 @@ import {Pressable, StyleSheet, View, type ViewStyle} from 'react-native';
 import Text from '../../../components/AppText';
 
 import {useAppTheme} from '../../../theme/ThemeProvider';
-import type {WeeklyReport} from '../types';
+import type {WeeklyReportData} from '../../../services/api/reports';
 import CardHeader from './CardHeader';
 import ReportCard from './ReportCard';
 
 interface StressKeywordCardProps {
-  causes: WeeklyReport['causes'];
+  causes: WeeklyReportData['causes'];
   selectedCause: string | null;
   onSelectCause: (cause: string | null) => void;
   hint?: string;

@@ -122,7 +122,7 @@ export default function RoomDecor({mode, floorRatio = 0.28}: {mode: ThemeMode; f
     // 선반: 오른쪽 벽, 말풍선 위
     const shelf = {x: w * 0.66, y: h * 0.34, w: Math.min(104, w * 0.27)};
     // 러그: 캐릭터 발밑
-    const rug = {cx: w / 2, cy: h - 66, rx: Math.min(150, w * 0.4), ry: 26};
+    const rug = {cx: w / 2, cy: h - 42, rx: Math.min(150, w * 0.4), ry: 26};
 
     return (
       <Svg width={w} height={h}>
@@ -193,11 +193,7 @@ export default function RoomDecor({mode, floorRatio = 0.28}: {mode: ThemeMode; f
           <Sprout x={w * 0.12 - 2} y={floorTop + 2} size={30} colors={c} />
           <Pot x={w * 0.12} bottom={floorTop + 44} width={40} colors={c} />
         </G>
-        {/* 오른쪽 구석 작은 화분 */}
-        <G>
-          <Sprout x={w * 0.9} y={floorTop + 26} size={24} colors={c} />
-          <Pot x={w * 0.9} bottom={floorTop + 50} width={26} colors={c} />
-        </G>
+        {/* 오른쪽 구석에는 우체통(MailboxButton)이 선다. */}
       </Svg>
     );
   };

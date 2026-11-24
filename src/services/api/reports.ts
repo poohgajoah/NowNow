@@ -61,6 +61,24 @@ export interface MonthlyReportData {
   };
 }
 
+// 주간 리포트 (weekStart: 월요일 YYYY-MM-DD, 이번 주면 오늘까지). 리포트 탭 '주간': 걸음수·수면 + 스트레스 키워드
+export interface WeeklyReportData {
+  weekStart: string;
+  weekEnd: string;
+  days: {
+    date: string;
+    sleepMinutes: number | null;
+    totalSteps: number | null;
+    causes?: string[];
+  }[];
+  causes: {cause: string; count: number}[];
+}
+
+export async function getWeeklyReport(weekStart: string) {
+  const {data} = await request<{data: WeeklyReportData}>('GET', `/api/reports/weekly/${weekStart}`);
+  return data;
+}
+
 // 월간 리포트 (month: YYYY-MM, 이번 달이면 오늘까지)
 export async function getMonthlyReport(month: string) {
   const {data} = await request<{data: MonthlyReportData}>('GET', `/api/reports/monthly/${month}`);

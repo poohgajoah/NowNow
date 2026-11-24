@@ -1,6 +1,7 @@
 export type MetricType = 'heartRate' | 'bloodPressure' | 'steps' | 'sleep';
 export type ReportPeriod = 'day' | 'week' | 'month';
-export type ReportTab = 'daily' | 'weekly' | 'monthly';
+// 월간 스트레스 리포트는 홈의 우체통(편지)으로 옮겼다.
+export type ReportTab = 'daily' | 'weekly';
 export type StressPeriod = 'day' | 'yesterday';
 
 export interface HrvPoint {

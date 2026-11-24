@@ -114,7 +114,6 @@ export default function TabNavigator() {
           styles.tabBar,
           {
             backgroundColor: theme.nav,
-            borderTopColor: theme.border,
             paddingBottom: insets.bottom,
           },
         ]}
@@ -167,7 +166,6 @@ const styles = StyleSheet.create({
   },
   tabBar: {
     alignItems: 'flex-start',
-    borderTopWidth: StyleSheet.hairlineWidth,
     flexDirection: 'row',
     justifyContent: 'space-around',
     paddingHorizontal: TAB_BAR.padding,
