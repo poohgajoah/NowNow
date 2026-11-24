@@ -51,7 +51,6 @@
 - **서버:** Node.js / Express, Cloudflare Workers
 - **데이터 저장:** Supabase PostgreSQL
 - **건강 데이터 연동:** Health Connect (Galaxy Watch → Samsung Health, OMRON 혈압계 → OMRON connect)
-- **팀원:** 김신애 · 박연희 · 전민 · 황혜림
 
 ## 기획 배경
 
@@ -625,7 +624,7 @@ node --test
 
 아래 내용은 저장소의 구현 파일과 커밋 이력을 기준으로 기능 영역을 구분했습니다. 초기 화면 구축과 이후 기능 확장을 구분하고, 앱 화면 구현과 서버 로직 구현을 별도 역할로 정리했습니다.
 
-### 황혜림 [@poohgajoah](https://github.com/poohgajoah)
+### [@poohgajoah](https://github.com/poohgajoah)
 
 **건강 데이터 파이프라인 · 스트레스 계산 · 백엔드 및 데이터 처리 · 홈 기능 확장**
 
@@ -639,7 +638,7 @@ node --test
 - **실시간·월간 리포트 UI 구현 및 전반적인 UI 개선:** 건강 데이터와 스트레스 흐름을 확인하는 실시간 리포트 및 월간 통계 화면 구현, Pretendard·공통 컴포넌트·디자인 토큰·라이트/다크 테마 정비와 채팅 등 주요 화면의 사용성 개선
 - **시연용 데모 환경 구축:** [NowNow 데모 레포](https://github.com/poohgajoah/nownow-demo)를 별도로 구성해 실제 건강 데이터가 없는 환경에서도 주요 기능을 시연할 수 있도록 준비. 데모 계정 '김대리'의 30일 건강 기록(심박수·걸음 수·수면·혈압·산소포화도), 대화 및 하루 요약 시나리오를 작성하고, 시드 스크립트로 데이터 미리보기·초기화·재입력 기능 구성. 스트레스 점수 자체를 임의로 주입하지 않고 원본 건강 기록을 넣어 서버의 스트레스 계산 로직으로 생성하도록 구현. 데모 앱에서는 Health Connect 자동 동기화를 비활성화해 실제 기기 기록이 데모 데이터를 덮어쓰지 않도록 분리하고, 별도 앱 ID를 사용해 원본 앱과 함께 설치할 수 있도록 구성.
 
-### 전민 [@letsggong03](https://github.com/letsggong03)
+### [@letsggong03](https://github.com/letsggong03)
 
 **AI 챗봇 연동 · 대화 경험 · AI 요약 기능 · 혈압계 연동**
 
@@ -649,7 +648,7 @@ node --test
 - **챗봇 데모 모드:** 팀 백엔드 로그인 없이 실행할 수 있는 독립 데모와 로컬 대화 저장 기능 구성
 - **오므론 혈압계 연동:** OMRON connect → Health Connect 경유 혈압 기록 연동과 앱 통합 개선, Android 블루투스 권한 및 BLE 직접 수신 코드 추가
 
-### 박연희 [@h2st0ry](https://github.com/h2st0ry)
+### [@h2st0ry](https://github.com/h2st0ry)
 
 **초기 앱 구조 · ERD · UI/UX · 3D 캐릭터 및 테마**
 
@@ -660,7 +659,7 @@ node --test
 - **테마 시스템:** 라이트·다크 테마와 공통 색상·간격 스타일 구성
 
 
-### 김신애 [@jinxishihenian1](https://github.com/jinxishihenian1)
+### [@jinxishihenian1](https://github.com/jinxishihenian1)
 
 **초기 백엔드 서버 구성 · 인증 및 데이터 관리 API 구현**
 
