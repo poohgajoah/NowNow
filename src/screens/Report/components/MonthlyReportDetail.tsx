@@ -14,6 +14,7 @@ import DetailHeader from './DetailHeader';
 import HealthCard from './HealthCard';
 import ReportCard from './ReportCard';
 import KeywordDonut from './KeywordDonut';
+import LetterNote from './LetterNote';
 
 // UI 확인용: true 면 서버 대신 목업 데이터로 월간 리포트를 그린다.
 const USE_MONTHLY_MOCK = false;
@@ -138,7 +139,15 @@ function StressCalendar({report, highlighted}: {report: MonthlyReportData; highl
 }
 
 // 일간 탭의 '뿡뿡이의 스트레스 원인 분석' 카드와 같은 모양
-function MonthlyAnalysisCard({analysis, keywords, calendar}: {
+// 편지로 볼 때는 카드 제목·안내도 캐릭터 말투로
+const TITLES = {
+  report: {cause: '이번 달 스트레스 원인', others: '이런 날도 스트레스가 높았어요', note: '이번 달 하루 정리와 스트레스 점수로 본 경향이에요. 진단이 아니에요.', calendar: '날짜별 스트레스'},
+  letter: {cause: '너를 힘들게 한 것들', others: '이런 날도 많이 힘들어 보였어', note: '내가 하루 정리랑 스트레스 점수를 보고 느낀 거라, 진단은 아니야.', calendar: '하루하루 마음 날씨'},
+};
+type Titles = typeof TITLES.report;
+
+function MonthlyAnalysisCard({analysis, keywords, calendar, titles = TITLES.report}: {
+  titles?: Titles;
   analysis: MonthlyReportData['analysis'];
   keywords?: React.ReactNode;
   calendar?: React.ReactNode;
@@ -148,7 +157,7 @@ function MonthlyAnalysisCard({analysis, keywords, calendar}: {
   const others = rest.filter(cause => cause.label !== top?.label).slice(0, 2);
   return (
     <ReportCard>
-      <CardHeader title="이번 달 스트레스 원인" />
+      <CardHeader title={titles.cause} />
 
       {/* 숫자보다 '무엇이 원인인지'가 먼저 읽히게: 원인 이름을 크게, 설명은 문장으로 */}
       {top ? (
@@ -162,7 +171,7 @@ function MonthlyAnalysisCard({analysis, keywords, calendar}: {
           {others.length > 0 && (
             // 구분선은 '이런 날도…' 소제목 위에, 아래 줄들 사이에는 첫 줄 빼고 선
             <View style={[styles.others, {borderTopColor: theme.border}]}>
-              <Text style={[styles.causeName, {color: theme.text}]}>이런 날도 스트레스가 높았어요</Text>
+              <Text style={[styles.causeName, {color: theme.text}]}>{titles.others}</Text>
               {others.map((cause, index) => (
                 <View
                   key={`${cause.kind}:${cause.label}`}
@@ -188,14 +197,14 @@ function MonthlyAnalysisCard({analysis, keywords, calendar}: {
       {/* 원그래프 아래, 달력 구분선 위 */}
       {top && (
         <Text style={[styles.note, {color: theme.textMuted}]}>
-          이번 달 하루 정리와 스트레스 점수로 본 경향이에요. 진단이 아니에요.
+          {titles.note}
         </Text>
       )}
 
       {calendar && (
         <>
           <View style={[styles.sectionDivider, {backgroundColor: theme.border}]} />
-          <Text style={[styles.sectionTitle, {color: theme.text}]}>날짜별 스트레스</Text>
+          <Text style={[styles.sectionTitle, {color: theme.text}]}>{titles.calendar}</Text>
           {calendar}
         </>
       )}
@@ -205,11 +214,13 @@ function MonthlyAnalysisCard({analysis, keywords, calendar}: {
 
 // 월간 스트레스 리포트 화면. 홈의 우체통에서 '편지'로 연다.
 // initialReport: 우체통이 미리 받아 둔 데이터가 있으면 다시 부르지 않는다.
-export default function MonthlyReportDetail({month, onBack, backLabel = '월간', initialReport = null}: {
+export default function MonthlyReportDetail({month, onBack, backLabel = '월간', initialReport = null, letter}: {
   month: Month;
   onBack: () => void;
   backLabel?: string;
   initialReport?: MonthlyReportData | null;
+  // 우체통 편지로 볼 때: 맨 위에 캐릭터 편지글을 붙이고 제목들을 캐릭터 말투로 바꾼다.
+  letter?: {month: number; inProgress: boolean};
 }) {
   const {theme} = useAppTheme();
   const [report, setReport] = useState<MonthlyReportData | null>(initialReport);
@@ -260,7 +271,8 @@ export default function MonthlyReportDetail({month, onBack, backLabel = '월간'
             <ActivityIndicator style={styles.loading} color={theme.accent} />
           ) : (
             <Text style={[styles.muted, {color: theme.textMuted}]}>
-              {unavailable ? '월간 기록을 불러오지 못했어요. 서버 연결을 확인해 주세요.' : '이 달에 표시할 스트레스 기록이 없어요.'}
+              {unavailable ? '월간 기록을 불러오지 못했어요. 서버 연결을 확인해 주세요.'
+                : letter ? '아직 편지에 쓸 기록이 없어. 하루 이야기를 들려주면 차곡차곡 적어 둘게!' : '이 달에 표시할 스트레스 기록이 없어요.'}
             </Text>
           )}
         </ReportCard>
@@ -268,7 +280,9 @@ export default function MonthlyReportDetail({month, onBack, backLabel = '월간'
         <>
           {/* 원인 분석 카드 안에 키워드 버튼: 누르면 아래 달력에 그 원인이 나온 날이 칠해진다. */}
           {/* 원인 분석 + 키워드 + 달력을 한 카드로 (키워드를 누르면 바로 아래 달력이 바뀐다) */}
+          {letter && <LetterNote report={report} month={letter.month} inProgress={letter.inProgress} />}
           <MonthlyAnalysisCard
+            titles={letter ? TITLES.letter : TITLES.report}
             analysis={report.analysis}
             keywords={report.causes.length > 0 && (
               <KeywordDonut

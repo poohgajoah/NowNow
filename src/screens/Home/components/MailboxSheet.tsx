@@ -143,10 +143,11 @@ export default function MailboxSheet({visible, onClose, letters, draft, nextDeli
             contentContainerStyle={[styles.content, {paddingBottom: SCREEN_BOTTOM_INSET}]}
             showsVerticalScrollIndicator={false}>
             <MonthlyReportDetail
-              month={{key: view.letter.key, label: `${view.letter.label} 편지`}}
+              month={{key: view.letter.key, label: `${view.letter.month}월의 편지`}}
               initialReport={view.letter.report}
               backLabel="우체통"
               onBack={back}
+              letter={{month: view.letter.month, inProgress: view.letter.inProgress}}
             />
             {view.letter.inProgress && (
               <Text style={[styles.note, {color: theme.textMuted}]}>
