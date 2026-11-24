@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <strong>스마트워치 건강 데이터로 스트레스 변화를 살펴보고,<br />
+  <strong>웨어러블 건강 기록과 의료기기 혈압계의 측정 데이터를 연결하고,<br />
   나를 기억하는 AI 캐릭터와 대화하며 일상 속 관리를 돕는 웰니스 앱</strong>
 </p>
 
@@ -41,7 +41,7 @@
 
 ## 프로젝트 소개
 
-**NowNow**는 스마트워치와 건강 플랫폼에 쌓이는 생체 데이터를 바탕으로 사용자의 스트레스 변화를 확인하고, AI 캐릭터 '뿡뿡이'와의 대화를 통해 일상적인 정서 관리를 돕는 Android 웰니스 애플리케이션입니다.
+**NowNow**는 웨어러블 건강 기록과 의료기기 혈압계로 측정한 혈압 데이터를 바탕으로 사용자의 스트레스 변화를 확인하고, AI 캐릭터 '뿡뿡이'와의 대화를 통해 일상적인 정서 관리를 돕는 Android 웰니스 애플리케이션입니다.
 
 건강 수치를 단순히 나열하는 데 그치지 않고, 건강 기록과 대화 내용을 함께 활용해 사용자가 자신의 컨디션과 스트레스 상황을 돌아볼 수 있도록 설계했습니다.
 
@@ -124,67 +124,90 @@ NowNow는 이러한 문제를 해결하기 위해 스마트워치 건강 데이�
 ## 시스템 아키텍처
 
 ```mermaid
-flowchart TB
-  subgraph SOURCE["건강 데이터 소스"]
-    WATCH["Galaxy Watch"]
-    SAMSUNG["Samsung Health"]
-    BP["BLE 혈압계"]
-    WATCH --> SAMSUNG
-  end
-
-  subgraph MOBILE["Android 앱"]
-    HC["Health Connect"]
-    NATIVE["Kotlin HealthConnectModule<br/>(React Native Bridge)"]
-    BLE["React Native BLE"]
-    APP["React Native 앱"]
-    SAMSUNG --> HC
-    HC --> NATIVE
-    BP --> BLE
-    NATIVE --> APP
-    BLE --> APP
-  end
-
-  subgraph BACKEND["백엔드 서버"]
-    API["Node.js / Express"]
-    STRESS["건강 데이터 처리<br/>스트레스 점수·리포트 계산"]
-    MEMORY["대화 요약·기억 검색"]
-    API --> STRESS
-    API --> MEMORY
-  end
-
-  subgraph DATA["데이터 저장소"]
-    DB[("Supabase PostgreSQL<br/>pgvector 확장 포함<br/>memory_embeddings · chat_summaries")]
-    RPC["PostgreSQL RPC<br/>match_nownow_chat_memories()"]
-    DB --- RPC
-  end
-
-  subgraph AI["AI 서비스"]
-    WORKER["Cloudflare Worker<br/>(AI Relay)"]
-    CHAT["OpenAI gpt-4o-mini"]
-    EMBED["OpenAI Embeddings<br/>text-embedding-3-small"]
-    WORKER --> CHAT
-  end
-
-  APP -->|"건강 기록 동기화·API 요청<br/>Supabase Auth Access Token"| API
-  API -->|"건강 기록·채팅·계산 결과 저장/조회"| DB
-  MEMORY -->|"질문·요약 텍스트 임베딩 요청"| EMBED
-  EMBED -->|"1536차원 벡터 반환"| MEMORY
-  MEMORY -->|"Supabase SDK로 벡터 저장·조회"| DB
-  MEMORY -->|"RPC 호출: 질문 벡터 전달"| RPC
-  RPC -->|"pgvector 코사인 거리 검색"| DB
-  API -->|"AI 요청"| WORKER
-  WORKER -->|"생성 결과"| API
-  API -->|"응답·리포트 데이터"| APP
-
-  classDef mobile fill:#eaf4ff,stroke:#4c86c6,color:#18324b
-  classDef backend fill:#eaf7ee,stroke:#4d9664,color:#183b25
-  classDef data fill:#fff4df,stroke:#c28a32,color:#51380d
-  classDef ai fill:#f4edff,stroke:#8662b5,color:#35234d
-  class HC,NATIVE,BLE,APP mobile
-  class API,STRESS,MEMORY backend
-  class DB,RPC data
-  class WORKER,CHAT,EMBED ai
+flowchart LR
+  W["Galaxy Watch"] --> S["Samsung Health"] --> HC["Health Connect"]
+  BP["OMRON 혈압계"] --> OC["OMRON connect"] --> HC
+  HC --> K["Kotlin 네이티브 모듈"] --> APP["React Native 앱"]
+  MAN["혈압 직접 입력"] --> APP
+  APP --> API["Express API / 인증 검증"]
+  API <--> DB["Supabase PostgreSQL / pgvector"]
+  API --> CTX["건강 기록 · 취향 · 관련 기억"]
+  CTX --> RELAY["Cloudflare Worker"] --> LLM["OpenAI 응답 생성"]
+  LLM --> RELAY --> API --> APP
 ```
+
+위 구성도는 실기기에서 확인한 OMRON connect 경유 경로를 표시합니다. 혈압계에서 나우나우로 직접 수신하는 BLE 모듈은 이 경로와 별개의 구현입니다. 앱의 로컬 건강 기록 조회와 백엔드 동기화도 별도 단계입니다.
+
+
+
+### 주요 기능 파이프라인
+
+#### 1. 건강 기록 연결 및 혈압 표시
+
+```mermaid
+flowchart LR
+  A["사용자 건강 기록 접근 동의"] --> B["Kotlin: Health Connect 조회"]
+  B --> C["기록 시각 · 출처 · 원본 ID 유지"]
+  C --> D["현재 기록: 리포트 상태 갱신"]
+  C --> E["Changes API: 추가 · 수정 · 삭제"]
+  E --> F["인증 API: 원본 기록 저장"]
+  F --> G["성공 후 동기화 토큰 갱신"]
+  F --> H["서버 기록 조회"]
+  D --> I["혈압 시각 기준 병합 · 정렬"]
+  H --> I --> J["최신 수치 · 시간대 그래프"]
+```
+
+리포트는 네이티브 조회 결과와 서버 혈압 기록을 측정 시각 기준으로 합칩니다. 동기화 토큰은 서버 저장 성공 후 갱신하며, 출처와 원본 ID를 증분 동기화에 활용합니다.
+
+#### 2. 건강 리포트 및 활동 추천
+
+```mermaid
+flowchart LR
+  A["로그인 사용자 · 조회 기간"] --> B["건강 기록 · 저장된 대화 요약 조회"]
+  B --> C["시간대별 건강 기록 집계"]
+  C --> D["자체 스트레스 참고 지표 계산"]
+  B --> E["원인 키워드 · 관련 상황 분석"]
+  D --> F["실시간 · 월간 리포트 응답"]
+  E --> F --> G["카드 · 그래프 · 달력 · 키워드 표시"]
+  G --> H["건강 기록 · 취향을 참고한 활동 추천"]
+```
+
+스트레스 지표는 시간 간격 심박 기록 등을 이용한 자체 웰니스 참고 지표이며 RR 간격 기반 HRV 측정과 구분합니다. 원인 키워드는 대화 요약에서 정리된 정보를 활용합니다.
+
+#### 3. 관련 대화 기억을 활용한 AI 캐릭터 케어
+
+```mermaid
+flowchart LR
+  Q["사용자 질문"] --> API["Express: 인증 · 대화 처리"]
+  API --> H["질문 기간에 맞는 건강 기록"]
+  API --> P["취향 · 최근 대화"]
+  API --> QE["질문 임베딩 생성"]
+  QE --> V["pgvector: 관련 과거 요약 검색"]
+  H --> CTX["답변 맥락 구성"]
+  P --> CTX
+  V --> CTX
+  CTX --> RELAY["Cloudflare Worker → OpenAI"]
+  RELAY --> OUT["응답 저장 · 앱 표시"]
+  OUT --> SUM["하루 정리: 요약 · 감정 · 키워드"]
+  SUM --> EMB["요약 임베딩 저장"]
+  EMB --> V
+```
+
+요약 저장(인덱싱)과 질문 시 검색(검색·생성)을 구분합니다. 건강 기록 조회는 별도의 건강 맥락 서비스가 담당하며, 관련 요약 검색 결과와 취향·최근 대화를 합쳐 답변 맥락을 구성합니다.
+
+### 구현 책임과 코드 근거
+
+| 구현 영역 | 핵심 처리 | 구현 파일 |
+|---|---|---|
+| 건강 기록 접근 | BloodPressureRecord 등 건강 기록 조회, Changes API | `android/app/src/main/java/com/mibandtest/HealthConnectModule.kt` |
+| 증분 동기화 | 전송 데이터 구성, 성공 후 토큰 갱신 | `src/services/health/healthSync.ts`, `healthSyncPayload.ts` |
+| 혈압 리포트 | 네이티브·서버 기록 병합, 직접 입력 검증·저장 | `src/screens/Report/ReportPage.tsx` |
+| 스트레스 및 리포트 | 시간대 집계, 점수·월간 통계·원인 분석 | `backend/services/stressCalculator.js`, `reportService.js`, `stressCauseAnalysis.js` |
+| 대화 맥락 | 질문에 필요한 건강 기록 구성 | `backend/services/healthContextService.js` |
+| 대화 기억 검색 | 요약 임베딩 저장, pgvector RPC 검색 | `backend/services/chatMemorySearch.js` |
+| AI 응답 | 사용자 맥락 구성 및 모델 호출 중계 | `backend/services/chatRelayService.js`, `chatbot-server/worker.mjs` |
+
+직접 구현한 데이터 연결·집계·화면 상태·맥락 구성과, 활용한 Health Connect·Supabase·pgvector·OpenAI 플랫폼을 구분합니다. 상세 데이터 구조는 아래 ERD와 함께 확인할 수 있습니다.
 
 ### 데이터베이스 ERD
 
