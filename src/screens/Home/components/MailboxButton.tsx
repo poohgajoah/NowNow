@@ -1,7 +1,7 @@
 import React, {useEffect, useRef} from 'react';
 import {Animated, Pressable, StyleSheet, View} from 'react-native';
 import Svg, {Circle, Ellipse, Path, Rect} from 'react-native-svg';
-import {Mail} from 'lucide-react-native';
+import {Mail, MailOpen} from 'lucide-react-native';
 
 import {shadows} from '../../../theme/shadows';
 import {useAppTheme} from '../../../theme/ThemeProvider';
@@ -43,13 +43,17 @@ function MailboxArt({mode}: {mode: ThemeMode}) {
   );
 }
 
-// 우체통 그림 + 새 편지가 오면 그 위에 메일 아이콘이 둥실둥실 뜬다.
+// 우체통 그림 + 위에 늘 메일 아이콘이 떠 있다.
+// 평소: 열린 봉투(가만히). 새 편지가 오면: 닫힌 분홍 봉투 + 빨간 점, 둥실둥실 움직인다.
 export default function MailboxButton({hasUnread, onPress}: MailboxButtonProps) {
   const {theme} = useAppTheme();
   const bob = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    if (!hasUnread) return;
+    if (!hasUnread) {
+      bob.setValue(0);
+      return;
+    }
     const loop = Animated.loop(
       Animated.sequence([
         Animated.timing(bob, {duration: 700, toValue: 1, useNativeDriver: true}),
@@ -67,18 +71,22 @@ export default function MailboxButton({hasUnread, onPress}: MailboxButtonProps) 
       hitSlop={10}
       onPress={onPress}
       style={({pressed}) => [styles.wrap, pressed && styles.pressed]}>
-      {hasUnread && (
-        <Animated.View
-          style={[styles.bubble, {
-            backgroundColor: theme.surface,
-            transform: [{translateY: bob.interpolate({inputRange: [0, 1], outputRange: [0, -6]})}],
-          }]}>
-          <Mail size={20} color={theme.accentStrong} strokeWidth={2.2} />
-          <View style={[styles.dot, {backgroundColor: theme.stressWorst, borderColor: theme.surface}]} />
-          {/* 말풍선 꼬리 */}
-          <View style={[styles.tail, {borderTopColor: theme.surface}]} />
-        </Animated.View>
-      )}
+      <Animated.View
+        style={[styles.bubble, {
+          backgroundColor: theme.surface,
+          transform: [{translateY: bob.interpolate({inputRange: [0, 1], outputRange: [0, -6]})}],
+        }]}>
+        {hasUnread ? (
+          <>
+            <Mail size={20} color={theme.accentStrong} strokeWidth={2.2} />
+            <View style={[styles.dot, {backgroundColor: theme.stressWorst, borderColor: theme.surface}]} />
+          </>
+        ) : (
+          <MailOpen size={20} color={theme.icon} strokeWidth={2} />
+        )}
+        {/* 말풍선 꼬리 */}
+        <View style={[styles.tail, {borderTopColor: theme.surface}]} />
+      </Animated.View>
       <MailboxArt mode={theme.mode} />
     </Pressable>
   );
