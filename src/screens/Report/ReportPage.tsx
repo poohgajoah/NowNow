@@ -32,6 +32,17 @@ const formatSleep = (minutes?: number) => {
   return `${h}시간 ${m}분`;
 };
 
+// 수면 카드: 걸음 수처럼 숫자는 크게, 단위는 작게 (6 시간 30 분)
+const sleepParts = (minutes?: number) => {
+  if (!minutes) return undefined;
+  const h = Math.floor(minutes / 60);
+  const m = Math.floor(minutes % 60);
+  return [
+    ...(h > 0 ? [{value: String(h), unit: '시간'}] : []),
+    {value: String(m), unit: '분'},
+  ];
+};
+
 const formatToday = () =>
   new Intl.DateTimeFormat('ko-KR', {
     year: 'numeric',
@@ -178,6 +189,7 @@ export default function ReportPage() {
       <HealthCard
         title="수면시간"
         value={formatSleep(healthData?.latestSleepMinutes)}
+        parts={sleepParts(healthData?.latestSleepMinutes)}
         selected={selectedMetric === 'sleep'}
         onPress={() => {setSelectedMetric('sleep'); setInputOpen(false);}}
       />
