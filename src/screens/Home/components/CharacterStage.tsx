@@ -18,6 +18,8 @@ interface CharacterStageProps {
   onPressMessage?: () => void;
   // 방 위쪽에 놓을 것(행동 아이콘 줄)
   children?: React.ReactNode;
+  // 방 오른쪽 아래 구석에 놓을 것(우체통)
+  corner?: React.ReactNode;
 }
 
 // 방 색(벽·캐릭터 그림자). 벽지·창문·바닥 등 꾸밈은 RoomDecor가 그린다.
@@ -41,6 +43,7 @@ export default function CharacterStage({
   hideMessage = false,
   onPressMessage,
   children,
+  corner,
 }: CharacterStageProps) {
   const {theme} = useAppTheme();
   const room = ROOM[theme.mode];
@@ -104,9 +107,11 @@ export default function CharacterStage({
             </Animated.Text>
           ))}
           <View style={[styles.groundShadow, {backgroundColor: room.shadow}]} />
-          <CharacterPet mood={mood} isInteracting={isInteracting} />
+          <CharacterPet isInteracting={isInteracting} />
         </View>
       </View>
+
+      {corner && <View style={styles.corner}>{corner}</View>}
     </View>
   );
 }
@@ -138,6 +143,13 @@ const styles = StyleSheet.create({
     opacity: 0.7,
     position: 'absolute',
     width: 120,
+  },
+  // 우체통: 바닥 위, 캐릭터 오른쪽
+  corner: {
+    bottom: 26,
+    position: 'absolute',
+    right: 14,
+    zIndex: 2,
   },
   heart: {
     fontSize: 22,

@@ -8,10 +8,10 @@ import type {
 } from '../types';
 
 export const reportTabs: {key: ReportTab; label: string}[] = [
+  // 리포트 탭은 건강 데이터만: 실시간(오늘) / 주간(걸음수·수면 추이).
+  // 월간 스트레스 리포트는 홈 우체통에서 편지로 본다.
   {key: 'daily', label: '실시간'},
-  // 주간 리포트는 월간과 겹쳐서 탭에서 숨겼다(코드는 WeeklyReport.tsx에 그대로). 되살리려면 아래 줄을 다시 넣는다.
-  // {key: 'weekly', label: '주간'},
-  {key: 'monthly', label: '월간'},
+  {key: 'weekly', label: '주간'},
 ];
 
 export const stressPeriodOptions: {key: StressPeriod; label: string}[] = [
@@ -36,7 +36,10 @@ export const metricConfig: Record<MetricType, MetricConfig> = {
   },
 };
 
-export const WEEKLY_REPORT_COUNT = 4;
+// 주간 리포트에서 화살표로 거슬러 볼 수 있는 주 수(이번 주 포함)
+export const WEEKLY_REPORT_COUNT = 8;
+// 주간 그래프 목표선
+export const WEEKLY_GOALS = {steps: 7000, sleep: 7 * 60};
 
 export const insightFallbacks = {
   peakNote: '업무 관련 스트레스',

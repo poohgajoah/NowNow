@@ -11,7 +11,6 @@ import InsightCard from './components/InsightCard';
 import ReportHeader from './components/ReportHeader';
 import TrendChart from './components/TrendChart';
 import WeeklyReport from './components/WeeklyReport';
-import MonthlyReport from './components/MonthlyReport';
 import {metricConfig} from './constants/reportData';
 import {useReport} from './hooks/useReport';
 import type {ReportTab} from './types';
@@ -47,12 +46,7 @@ const formatNumber = (value?: number) => {
 
 export default function ReportPage() {
   const [tab, setTab] = useState<ReportTab>('daily');
-  // 주간/월간 상세 화면이 열려 있으면 맨 위 제목과 탭을 숨긴다 (상세 화면에 뒤로가기가 있다).
-  const [detailOpen, setDetailOpen] = useState(false);
-  const changeTab = (next: ReportTab) => {
-    setTab(next);
-    setDetailOpen(false);
-  };
+  const changeTab = (next: ReportTab) => setTab(next);
   const {theme} = useAppTheme();
   // 모듈 로드 시점이 아니라 화면이 열릴 때의 날짜를 기준으로 한다.
   const dateText = useMemo(formatToday, []);
@@ -158,7 +152,6 @@ export default function ReportPage() {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}>
         
-        {!detailOpen && <>
         {/* 큰 제목 왼쪽, 날짜는 같은 줄 오른쪽 끝 (글자 아랫선 맞춤) */}
         <View style={styles.titleRow}>
           <Text style={[styles.pageTitle, {color: theme.text}]}>
@@ -170,7 +163,6 @@ export default function ReportPage() {
         </View>
 
         <ReportHeader tab={tab} onChangeTab={changeTab} />
-        </>}
 
     {tab === 'daily' ? (
     <>
@@ -248,10 +240,8 @@ export default function ReportPage() {
         analysisLoading={syncing && healthData === null}
       />
       </>
-    ) : tab === 'weekly' ? (
-      <WeeklyReport onDetailChange={setDetailOpen} />
     ) : (
-      <MonthlyReport onDetailChange={setDetailOpen} />
+      <WeeklyReport />
     )}
       </ScrollView>
     </SafeAreaView>

@@ -193,11 +193,7 @@ export default function RoomDecor({mode, floorRatio = 0.28}: {mode: ThemeMode; f
           <Sprout x={w * 0.12 - 2} y={floorTop + 2} size={30} colors={c} />
           <Pot x={w * 0.12} bottom={floorTop + 44} width={40} colors={c} />
         </G>
-        {/* 오른쪽 구석 작은 화분 */}
-        <G>
-          <Sprout x={w * 0.9} y={floorTop + 26} size={24} colors={c} />
-          <Pot x={w * 0.9} bottom={floorTop + 50} width={26} colors={c} />
-        </G>
+        {/* 오른쪽 구석에는 우체통(MailboxButton)이 선다. */}
       </Svg>
     );
   };

@@ -1,8 +1,8 @@
-import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import {ActivityIndicator, BackHandler, StyleSheet, View} from 'react-native';
 import Text from '../../../components/AppText';
 
-import {format, getDay, parseISO, subMonths} from 'date-fns';
+import {format, getDay, parseISO} from 'date-fns';
 
 import {useAppTheme} from '../../../theme/ThemeProvider';
 import {getStressLevel, stressLevels} from '../constants/reportData';
@@ -14,24 +14,15 @@ import DetailHeader from './DetailHeader';
 import HealthCard from './HealthCard';
 import ReportCard from './ReportCard';
 import KeywordDonut from './KeywordDonut';
-import WeeklyReportItem, {ReportList} from './WeeklyReportItem';
 
 // UI 확인용: true 면 서버 대신 목업 데이터로 월간 리포트를 그린다.
 const USE_MONTHLY_MOCK = false;
-const MONTH_COUNT = 3;
 const WEEKDAYS = ['월', '화', '수', '목', '금', '토', '일'];
 
-interface Month {
+export interface Month {
   key: string; // YYYY-MM
   label: string;
 }
-
-// 이번 달부터 최근 달을 최신순으로
-const getRecentMonths = (count: number, baseDate = new Date()): Month[] =>
-  Array.from({length: count}, (_, index) => {
-    const date = subMonths(baseDate, index);
-    return {key: format(date, 'yyyy-MM'), label: format(date, 'yyyy년 M월')};
-  });
 
 const hours = (minutes: number | null) => (minutes === null ? '-' : String(Math.round((minutes / 60) * 10) / 10));
 const count = (value: number | null) => (value === null ? '-' : Math.round(value).toLocaleString());
@@ -212,9 +203,16 @@ function MonthlyAnalysisCard({analysis, keywords, calendar}: {
   );
 }
 
-function MonthlyReportDetail({month, onBack}: {month: Month; onBack: () => void}) {
+// 월간 스트레스 리포트 화면. 홈의 우체통에서 '편지'로 연다.
+// initialReport: 우체통이 미리 받아 둔 데이터가 있으면 다시 부르지 않는다.
+export default function MonthlyReportDetail({month, onBack, backLabel = '월간', initialReport = null}: {
+  month: Month;
+  onBack: () => void;
+  backLabel?: string;
+  initialReport?: MonthlyReportData | null;
+}) {
   const {theme} = useAppTheme();
-  const [report, setReport] = useState<MonthlyReportData | null>(null);
+  const [report, setReport] = useState<MonthlyReportData | null>(initialReport);
   const [unavailable, setUnavailable] = useState(false);
   const [selectedCause, setSelectedCause] = useState<string | null>(null);
 
@@ -224,11 +222,12 @@ function MonthlyReportDetail({month, onBack}: {month: Month; onBack: () => void}
       setReport(createMockMonthlyReport(month.key));
       return;
     }
+    if (initialReport) return;
     getMonthlyReport(month.key)
       .then(data => {if (active) setReport(data);})
       .catch(() => {if (active) setUnavailable(true);});
     return () => {active = false;};
-  }, [month.key]);
+  }, [month.key, initialReport]);
 
   useEffect(() => {
     const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
@@ -249,7 +248,7 @@ function MonthlyReportDetail({month, onBack}: {month: Month; onBack: () => void}
   return (
     <>
       <DetailHeader
-        backLabel="월간"
+        backLabel={backLabel}
         onBack={onBack}
         title={month.label}
         subtitle={report ? `${format(parseISO(report.from), 'M.d')} ~ ${format(parseISO(report.to), 'M.d')}` : undefined}
@@ -284,32 +283,6 @@ function MonthlyReportDetail({month, onBack}: {month: Month; onBack: () => void}
         </>
       )}
     </>
-  );
-}
-
-export default function MonthlyReport({onDetailChange}: {onDetailChange?: (open: boolean) => void}) {
-  const months = useMemo(() => getRecentMonths(MONTH_COUNT), []);
-  const [selected, setSelected] = useState<Month | null>(null);
-  const handleBack = useCallback(() => setSelected(null), []);
-
-  // 상세 화면이 열리고 닫히는 걸 리포트 화면에 알린다 (맨 위 제목·탭 숨김용)
-  useEffect(() => {
-    onDetailChange?.(selected !== null);
-  }, [selected, onDetailChange]);
-
-  if (selected) return <MonthlyReportDetail month={selected} onBack={handleBack} />;
-
-  return (
-    <ReportList>
-      {months.map((month, index) => (
-        <WeeklyReportItem
-          key={month.key}
-          title={month.label}
-          last={index === months.length - 1}
-          onPress={() => setSelected(month)}
-        />
-      ))}
-    </ReportList>
   );
 }
 
