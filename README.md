@@ -649,7 +649,7 @@ node --test
 - **챗봇 데모 모드:** 팀 백엔드 로그인 없이 실행할 수 있는 독립 데모와 로컬 대화 저장 기능 구성
 - **오므론 혈압계 연동:** OMRON connect → Health Connect 경유 혈압 기록 연동과 앱 통합 개선, Android 블루투스 권한 및 BLE 직접 수신 코드 추가
 
-### [@h2st0ry](https://github.com/h2st0ry)
+### 박연희 [@h2st0ry](https://github.com/h2st0ry)
 
 **초기 앱 구조 · ERD · UI/UX · 3D 캐릭터 및 테마**
 
@@ -660,7 +660,7 @@ node --test
 - **테마 시스템:** 라이트·다크 테마와 공통 색상·간격 스타일 구성
 
 
-### [@jinxishihenian1](https://github.com/jinxishihenian1)
+### 김신애 [@jinxishihenian1](https://github.com/jinxishihenian1)
 
 **초기 백엔드 서버 구성 · 인증 및 데이터 관리 API 구현**
 
