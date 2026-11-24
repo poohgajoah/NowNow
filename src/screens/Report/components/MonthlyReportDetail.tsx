@@ -16,6 +16,10 @@ import ReportCard from './ReportCard';
 import KeywordDonut from './KeywordDonut';
 import LetterNote from './LetterNote';
 
+// 한글 설명을 단어가 아니라 글자 단위로 줄바꿈해서 줄 끝까지 채운다.
+// 글자 사이에 폭 없는 공백(U+200B)을 넣어 어디서든 줄이 바뀔 수 있게 한다.
+const fillLines = (text: string) => text.replace(/([가-힣])(?=[가-힣])/g, '$1' + String.fromCharCode(0x200b));
+
 // UI 확인용: true 면 서버 대신 목업 데이터로 월간 리포트를 그린다.
 const USE_MONTHLY_MOCK = false;
 const WEEKDAYS = ['월', '화', '수', '목', '금', '토', '일'];
@@ -165,7 +169,7 @@ function MonthlyAnalysisCard({analysis, keywords, calendar, titles = TITLES.repo
           {/* 가장 큰 원인: 이름은 왼쪽에 크게, 설명은 오른쪽에 */}
           <View style={styles.topCause}>
             <Text style={[styles.topCauseName, {color: theme.text}]}>{top.label}</Text>
-            <Text style={[styles.topCauseText, {color: theme.text}]}>{top.conclusion}</Text>
+            <Text textBreakStrategy="simple" style={[styles.topCauseText, {color: theme.text}]}>{fillLines(top.conclusion)}</Text>
           </View>
 
           {others.length > 0 && (
