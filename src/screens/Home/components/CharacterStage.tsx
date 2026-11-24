@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'flex-end',
     // 캐릭터(와 말풍선)를 바닥에서 띄우는 정도
-    paddingBottom: 60,
+    paddingBottom: 36,
   },
   characterArea: {
     alignItems: 'center',

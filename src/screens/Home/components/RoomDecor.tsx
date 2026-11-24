@@ -122,7 +122,7 @@ export default function RoomDecor({mode, floorRatio = 0.28}: {mode: ThemeMode; f
     // 선반: 오른쪽 벽, 말풍선 위
     const shelf = {x: w * 0.66, y: h * 0.34, w: Math.min(104, w * 0.27)};
     // 러그: 캐릭터 발밑
-    const rug = {cx: w / 2, cy: h - 66, rx: Math.min(150, w * 0.4), ry: 26};
+    const rug = {cx: w / 2, cy: h - 42, rx: Math.min(150, w * 0.4), ry: 26};
 
     return (
       <Svg width={w} height={h}>
