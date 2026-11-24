@@ -115,14 +115,14 @@ export default function HomePage({onOpenChat}: {onOpenChat?: () => void}) {
             )}
           </View>
         </CharacterStage>
-
-        <PreferencesCard
-          preferences={userPreferences}
-          detailKey={detailKey}
-          onDetailKeyChange={changeDetailKey}
-          musicVideoId={musicVideoId}
-        />
       </ScrollView>
+      {/* 아래에서 올라오는 창(Modal)이라 스크롤 영역 밖에 둔다. 안에 두면 방과 탭바 사이에 틈이 생긴다. */}
+      <PreferencesCard
+        preferences={userPreferences}
+        detailKey={detailKey}
+        onDetailKeyChange={changeDetailKey}
+        musicVideoId={musicVideoId}
+      />
     </SafeAreaView>
   );
 }
