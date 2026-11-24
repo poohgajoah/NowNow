@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {ScrollView, StyleSheet} from 'react-native';
+import {ScrollView, StyleSheet, View} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {useFocusEffect} from '@react-navigation/native';
 
@@ -44,6 +44,7 @@ export default function HomePage({onOpenChat}: {onOpenChat?: () => void}) {
   const [musicVideoId, setMusicVideoId] = useState<string | null>(null);
   // 선택지는 방 안(아이콘 줄 바로 아래)에 펼친다. 음악은 앨범 자켓, 나머지는 작은 버튼.
   const isMusicOpen = selectedAction === 'music';
+  const [pickerTop, setPickerTop] = useState(0);
 
   // 밥주기·음악은 고르자마자 배달앱·추천곡 창을 연다.
   const selectOption = (choice: string) => {
@@ -90,21 +91,29 @@ export default function HomePage({onOpenChat}: {onOpenChat?: () => void}) {
           minHeight={ROOM_MIN_HEIGHT}
           hideMessage={selectedAction !== null}
           onPressMessage={onOpenChat}>
-          <ActionBar
-            completedPreferences={userPreferences}
-            selectedAction={selectedAction}
-            onActionSelect={handleActionSelect}
-            onCancel={handleCancelOptions}
-          />
-          {isMusicOpen ? (
-            <MusicGenrePicker options={currentOptions} onSelect={selectMusic} />
-          ) : (
-            <OptionPicker
+          <View onLayout={event => {
+            const {y, height} = event.nativeEvent.layout;
+            setPickerTop(y + height);
+          }}>
+            <ActionBar
+              completedPreferences={userPreferences}
               selectedAction={selectedAction}
-              options={currentOptions}
-              onOptionSelect={selectOption}
+              onActionSelect={handleActionSelect}
+              onCancel={handleCancelOptions}
             />
-          )}
+          </View>
+          {/* 선택지(앨범 자켓 포함)는 아이콘 줄 아래에 떠 있게 해서, 열려도 캐릭터가 밀려 내려가지 않는다. */}
+          <View style={[styles.picker, {top: pickerTop}]} pointerEvents="box-none">
+            {isMusicOpen ? (
+              <MusicGenrePicker options={currentOptions} onSelect={selectMusic} />
+            ) : (
+              <OptionPicker
+                selectedAction={selectedAction}
+                options={currentOptions}
+                onOptionSelect={selectOption}
+              />
+            )}
+          </View>
         </CharacterStage>
 
         <PreferencesCard
@@ -119,6 +128,12 @@ export default function HomePage({onOpenChat}: {onOpenChat?: () => void}) {
 }
 
 const styles = StyleSheet.create({
+  picker: {
+    left: 0,
+    position: 'absolute',
+    right: 0,
+    zIndex: 3,
+  },
   safeArea: {
     flex: 1,
   },
