@@ -27,9 +27,10 @@ const PALETTE = {
     floor: '#EBDCC6',
     plank: '#DECAAE',
     baseboard: '#D6C1A3',
-    rug: '#CFE6B8',
-    rugInner: '#DDEFCB',
-    rugStripe: '#BEDCA3',
+    // 러그: 옅은 레몬색
+    rug: '#FBEFB3',
+    rugInner: '#FFF7D4',
+    rugStripe: '#EEDC8A',
     frame: '#FFFFFF',
     frameLine: '#D6E2CD',
     skyTop: '#CFE8FA',
@@ -56,9 +57,9 @@ const PALETTE = {
     floor: '#3A332B',
     plank: '#332D26',
     baseboard: '#2E2822',
-    rug: '#34412C',
-    rugInner: '#3B4932',
-    rugStripe: '#2F3A28',
+    rug: '#4A4430',
+    rugInner: '#544D37',
+    rugStripe: '#3F3A28',
     frame: '#3A3D36',
     frameLine: '#45493F',
     skyTop: '#1B2536',
@@ -122,7 +123,7 @@ export default function RoomDecor({mode, floorRatio = 0.28}: {mode: ThemeMode; f
     // 선반: 오른쪽 벽, 말풍선 위
     const shelf = {x: w * 0.66, y: h * 0.34, w: Math.min(104, w * 0.27)};
     // 러그: 캐릭터 발밑
-    const rug = {cx: w / 2, cy: h - 42, rx: Math.min(150, w * 0.4), ry: 26};
+    const rug = {cx: w / 2, cy: h - 72, rx: Math.min(150, w * 0.4), ry: 26};
 
     return (
       <Svg width={w} height={h}>

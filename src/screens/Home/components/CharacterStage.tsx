@@ -3,6 +3,7 @@ import {Animated, StyleSheet, View} from 'react-native';
 
 import {SCREEN_HORIZONTAL_PADDING} from '../../../theme/layout';
 import {useAppTheme} from '../../../theme/ThemeProvider';
+import type {WiltReason} from '../hooks/useWilt';
 import type {MoodType} from '../types';
 import CharacterMessage from './CharacterMessage';
 import CharacterPet from './CharacterPet';
@@ -11,6 +12,8 @@ import RoomDecor from './RoomDecor';
 interface CharacterStageProps {
   mood: MoodType;
   isInteracting: boolean;
+  // 캐릭터가 시든 까닭(없으면 null). 시들면 말풍선도 걱정하는 말로 바뀐다.
+  worry?: WiltReason | null;
   minHeight: number;
   // 선택지가 열려 방이 작아지면 말풍선이 아이콘 줄을 덮어서 숨긴다.
   hideMessage?: boolean;
@@ -24,7 +27,7 @@ interface CharacterStageProps {
 
 // 방 색(벽·캐릭터 그림자). 벽지·창문·바닥 등 꾸밈은 RoomDecor가 그린다.
 const ROOM = {
-  light: {wall: '#F8FBF5', shadow: '#BEDCA3'},
+  light: {wall: '#F8FBF5', shadow: '#E8D88E'},
   dark: {wall: '#252722', shadow: '#1E201B'},
 };
 
@@ -39,6 +42,7 @@ const HEARTS = [
 export default function CharacterStage({
   mood,
   isInteracting,
+  worry = null,
   minHeight,
   hideMessage = false,
   onPressMessage,
@@ -72,7 +76,7 @@ export default function CharacterStage({
       {children}
 
       <View style={styles.content}>
-        {!hideMessage && <CharacterMessage userMood={mood} onPress={onPressMessage} />}
+        {!hideMessage && <CharacterMessage userMood={mood} worry={worry} onPress={onPressMessage} />}
 
         <View style={styles.characterArea}>
           {HEARTS.map(({left}, index) => (
@@ -107,7 +111,7 @@ export default function CharacterStage({
             </Animated.Text>
           ))}
           <View style={[styles.groundShadow, {backgroundColor: room.shadow}]} />
-          <CharacterPet isInteracting={isInteracting} />
+          <CharacterPet isInteracting={isInteracting} wilted={worry !== null} />
         </View>
       </View>
 
@@ -129,7 +133,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'flex-end',
     // 캐릭터(와 말풍선)를 바닥에서 띄우는 정도
-    paddingBottom: 36,
+    paddingBottom: 66,
   },
   characterArea: {
     alignItems: 'center',
@@ -142,11 +146,11 @@ const styles = StyleSheet.create({
     height: 16,
     opacity: 0.7,
     position: 'absolute',
-    width: 120,
+    width: 136,
   },
   // 우체통: 바닥 위, 캐릭터 오른쪽
   corner: {
-    bottom: 26,
+    bottom: 56,
     position: 'absolute',
     right: 14,
     zIndex: 2,

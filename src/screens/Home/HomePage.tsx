@@ -13,6 +13,7 @@ import MusicGenrePicker from './components/MusicGenrePicker';
 import MailboxButton from './components/MailboxButton';
 import MailboxSheet from './components/MailboxSheet';
 import {useMailbox} from './hooks/useMailbox';
+import {useWilt} from './hooks/useWilt';
 import type {MusicTrack} from '../../services/api/music';
 import {useCharacterHome} from './hooks/useCharacterHome';
 import {SCREEN_HORIZONTAL_PADDING} from '../../theme/layout';
@@ -43,6 +44,8 @@ export default function HomePage({onOpenChat}: {onOpenChat?: () => void}) {
   const [historyOpen, setHistoryOpen] = useState(false);
   // 우체통: 월간 스트레스 리포트를 편지로 받는다.
   const mailbox = useMailbox();
+  // 오래 안 오거나 채팅을 안 하거나, 스트레스가 높거나 잠을 못 자면 캐릭터가 시든다. 돌봐 주면 살아난다.
+  const wilt = useWilt();
   const [mailboxOpen, setMailboxOpen] = useState(false);
   // 채팅 탭에서 돌아오면 채팅 경험치가 붙었을 수 있어 레벨을 다시 받는다.
   useFocusEffect(refreshLevel);
@@ -56,6 +59,7 @@ export default function HomePage({onOpenChat}: {onOpenChat?: () => void}) {
   const selectOption = (choice: string) => {
     const action = selectedAction;
     handleOptionSelect(choice);
+    wilt.revive();
     if (action && hasDetail(action)) {
       setTimeout(() => setDetailKey(action), DETAIL_OPEN_DELAY);
     }
@@ -105,6 +109,7 @@ export default function HomePage({onOpenChat}: {onOpenChat?: () => void}) {
         <CharacterStage
           mood={userMood}
           isInteracting={isInteracting}
+          worry={wilt.reason}
           minHeight={ROOM_MIN_HEIGHT}
           hideMessage={selectedAction !== null}
           onPressMessage={onOpenChat}
